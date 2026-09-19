@@ -466,7 +466,6 @@ th { font-weight: 500; color: var(--muted); font-size: .78rem; letter-spacing: .
 .upload-actions button { background: none; border: 0; color: #fff; font: inherit; font-size: .75rem; padding: .1rem .3rem; cursor: pointer; text-align: start; }
 .upload-busy { display: grid; place-items: center; color: var(--muted); font-size: .85rem; }
 
-@media (prefers-reduced-motion: reduce) { .hero-slides { overflow-x: auto; } }
 @media (hover: none) { .gallery-dots { display: none; } }
 
 /* audience picker in the product form */
@@ -698,3 +697,27 @@ body:has(.shop-wide) .site-header { max-width: 1500px; }
 @media (hover: none) { .nav-icon::after { display: none; } }
 /* the small count tab inside a text link (admin orders) */
 .nav-count.inline { position: static; display: inline-block; vertical-align: middle; margin-inline-start: .4rem; }
+
+/* pause / play for the phone carousel (only shown where the carousel is) */
+.hero-pause { display: none; }
+@media (max-width: 720px) {
+  .hero-pause {
+    position: absolute;
+    z-index: 4;
+    top: .7rem;
+    inset-inline-start: .7rem;
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    padding: 0;
+    color: #fff;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .45);
+    border-radius: 50%;
+    background: rgba(20, 24, 27, .4);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  .hero-pause svg { width: 1rem; height: 1rem; }
+}
