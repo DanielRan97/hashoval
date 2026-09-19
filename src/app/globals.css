@@ -721,3 +721,8 @@ body:has(.shop-wide) .site-header { max-width: 1500px; }
   }
   .hero-pause svg { width: 1rem; height: 1rem; }
 }
+
+/* diagnostic mode of the phone carousel (?debug=1, ?mode=scroll) */
+.hero-slides.scroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.hero-slides.scroll::-webkit-scrollbar { display: none; }
+.hero-debug { position: absolute; z-index: 5; inset-inline: .5rem; bottom: 4.2rem; margin: 0; padding: .3rem .5rem; font: 11px/1.4 ui-monospace, monospace; color: #9ef7b0; background: rgba(0, 0, 0, .7); white-space: pre-wrap; direction: ltr; text-align: left; pointer-events: none; }

@@ -3,52 +3,87 @@
 import { useEffect, useRef, useState } from "react";
 
 const LOOP_MS = 28_000; // time for the three bottles to pass once
-const SLOW_LOOP_MS = 90_000; // the same, for people who asked their device to reduce motion
+
+type Mode = "transform" | "scroll";
+type Stats = { frames: number; visible: boolean; offset: number; half: number };
 
 /**
  * The phone version of the home showcase: the three bottles scroll by endlessly. The motion is driven
- * from script rather than a CSS animation, so it does not depend on the browser starting one (some
- * mobile browsers silently skip them). It pauses while off screen. Under "reduce motion" it keeps
- * going but three times slower, and a small button lets anyone stop and resume it.
+ * from script rather than a CSS animation, so it does not depend on the browser starting one. It
+ * pauses while off screen. It deliberately does not follow the device's "reduce motion" setting (the
+ * owner wants it always moving); a small button lets anyone stop and resume it instead.
+ *
+ * Two ways of moving the strip exist, because some browsers treat them differently: "transform"
+ * (default) shifts the strip, "scroll" scrolls its container. For diagnosing a device, open the page
+ * with ?debug=1 to see live numbers, and ?mode=scroll to try the other way.
  */
 export function HeroSlides({ label }: { label: string }) {
+  const box = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
+  const stats = useRef<Stats>({ frames: 0, visible: true, offset: 0, half: 0 });
   const [isPaused, setIsPaused] = useState(false);
+  const [mode, setMode] = useState<Mode>("transform");
+  const [debug, setDebug] = useState<string | null>(null);
+
+  // read the diagnostic switches after mount, so the server and first client render agree
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("mode") === "scroll") setMode("scroll");
+    if (q.has("debug")) setDebug("starting…");
+  }, []);
 
   useEffect(() => {
     const el = track.current;
-    if (!el) return;
-    const loopMs = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? SLOW_LOOP_MS : LOOP_MS;
+    const scroller = box.current;
+    if (!el || !scroller) return;
 
     let frame = 0;
     let offset = 0;
     let last = 0;
-    let visible = true;
+    const s = stats.current;
+    s.visible = true;
     const observer = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
+      s.visible = entry.isIntersecting;
     });
-    observer.observe(el);
+    observer.observe(scroller);
 
     const step = (now: number) => {
       frame = requestAnimationFrame(step);
+      s.frames++;
       const dt = Math.min(64, now - (last || now)); // a long gap (tab in the background) must not make it jump
       last = now;
-      if (!visible || paused.current) return;
+      if (!s.visible || paused.current) return;
       const half = el.scrollWidth / 2; // the list is doubled, so one half is exactly one loop
-      offset = (offset + (half / loopMs) * dt) % half;
-      el.style.transform = `translate3d(${-offset}px, 0, 0)`;
+      s.half = half;
+      offset = (offset + (half / LOOP_MS) * dt) % half;
+      s.offset = offset;
+      if (mode === "scroll") scroller.scrollLeft = offset;
+      else el.style.transform = `translate3d(${-offset}px, 0, 0)`;
     };
     frame = requestAnimationFrame(step);
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
+      el.style.transform = "";
     };
-  }, []);
+  }, [mode]);
+
+  useEffect(() => {
+    if (debug === null) return;
+    const id = setInterval(() => {
+      const s = stats.current;
+      setDebug(
+        `mode=${mode} frames=${s.frames} visible=${s.visible} offset=${Math.round(s.offset)} half=${Math.round(s.half)} ` +
+          `paused=${paused.current} reduce=${window.matchMedia("(prefers-reduced-motion: reduce)").matches} w=${window.innerWidth}`,
+      );
+    }, 500);
+    return () => clearInterval(id);
+  }, [debug === null, mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
-      <div className="hero-slides" role="img" aria-label={label}>
+      <div className={mode === "scroll" ? "hero-slides scroll" : "hero-slides"} role="img" aria-label={label} ref={box}>
         <div className="hero-track" ref={track} aria-hidden="true">
           {[0, 1, 2, 0, 1, 2].map((_, i) => <div key={i} className="hero-slide" />)}
         </div>
@@ -69,6 +104,7 @@ export function HeroSlides({ label }: { label: string }) {
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor" /></svg>
         )}
       </button>
+      {debug !== null && <pre className="hero-debug">{debug}</pre>}
     </>
   );
 }
