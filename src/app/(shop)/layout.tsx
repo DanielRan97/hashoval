@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { CartProvider } from "@/lib/cart";
 import { CartLink } from "./CartLink";
+import { GlassDefs } from "./ProductImage";
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   return (
     <CartProvider>
+      <GlassDefs />
       <header className="site-header">
         <Link href="/" className="logo">hashoval</Link>
         <nav>
@@ -16,7 +18,6 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       </header>
       <main>{children}</main>
       <footer className="site-footer">
-        <div>hashoval · השובל שלך, בלי פשרות</div>
         <nav className="footer-links" aria-label="מידע משפטי">
           <Link href="/terms">תקנון</Link>
           <Link href="/privacy">מדיניות פרטיות</Link>

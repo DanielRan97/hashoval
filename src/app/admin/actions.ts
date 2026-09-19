@@ -6,7 +6,9 @@ import { checkPassword, endSession, requireAdmin, startSession } from "@/lib/aut
 import { configProblems } from "@/lib/configCheck";
 import { clientIp, minutes, recordHit, retryAfterSeconds } from "@/lib/rateLimit";
 import { db } from "@/lib/db";
-import { removeImage, saveImage } from "@/lib/uploads";
+import { isGender } from "@/lib/gender";
+import { parseImageUrls } from "@/lib/imageUrls";
+import { deleteUnusedFiles, setProductImages } from "@/lib/productImages";
 
 const LOGIN_WINDOW = 15 * 60_000;
 
@@ -48,6 +50,8 @@ function num(form: FormData, key: string) {
 function productData(form: FormData) {
   const bottleSizeMl = Math.round(num(form, "bottleSizeMl"));
   const marketValuePerBottle = num(form, "marketValuePerBottle");
+  const gender = form.get("gender");
+  if (!isGender(gender)) throw new Error("נא לבחור למי הבושם מיועד");
   const brand = String(form.get("brand") ?? "").trim();
   const name = String(form.get("name") ?? "").trim();
   if (!brand || !name) throw new Error("חובה למלא מותג ושם");
@@ -60,24 +64,28 @@ function productData(form: FormData) {
     bottleSizeMl,
     marketValuePerBottle,
     isActive: form.get("isActive") === "on",
+    isFeatured: form.get("isFeatured") === "on",
+    gender,
   };
 }
 
 export async function saveProduct(id: number | null, _: string | null, form: FormData) {
   await requireAdmin();
   let data;
-  let imageUrl: string | null;
+  let urls: string[] | null;
   try {
     data = productData(form);
-    imageUrl = await saveImage(form.get("image"));
+    urls = parseImageUrls(String(form.get("imageUrls") ?? "[]"));
   } catch (e) {
     return e instanceof Error ? e.message : "שגיאה";
   }
-  const withImage = imageUrl ? { ...data, imageUrl } : data;
+  if (urls === null) return "רשימת התמונות לא תקינה";
   await db.brand.upsert({ where: { name: data.brand }, update: {}, create: { name: data.brand } });
-  if (id === null) await db.product.create({ data: withImage });
-  else await db.product.update({ where: { id }, data: withImage });
+  const productId = id === null ? (await db.product.create({ data })).id : (await db.product.update({ where: { id }, data })).id;
+  await setProductImages(productId, urls);
   revalidatePath("/admin/products");
+  revalidatePath("/shop");
+  revalidatePath("/");
   redirect("/admin/products");
 }
 
@@ -124,8 +132,9 @@ export async function deleteProduct(id: number): Promise<string | null> {
   if ((await db.orderItem.count({ where: { productId: id } })) > 0) {
     return "אי אפשר למחוק בושם שיש עליו הזמנות (ההיסטוריה תישבר). אפשר לסמן אותו כלא פעיל.";
   }
+  const photos = await db.productImage.findMany({ where: { productId: id }, select: { url: true } });
   await db.product.delete({ where: { id } });
-  if (p.imageUrl && (await db.product.count({ where: { imageUrl: p.imageUrl } })) === 0) await removeImage(p.imageUrl);
+  await deleteUnusedFiles([...photos.map((x) => x.url), ...(p.imageUrl ? [p.imageUrl] : [])]);
   revalidatePath("/admin/products");
   redirect("/admin/products");
 }
@@ -175,4 +184,14 @@ export async function adjustStock(productId: number, _: AddStockResult | null, f
   revalidatePath("/shop");
   const total = Math.max(0, (updated.bottleSizeMl * updated.currentFillPercent) / 100);
   return { ok: true, message: `${remove ? "הורדו" : "נוספו"} ${ml} מ״ל. סה״כ במלאי עכשיו: ${total.toFixed(1)} מ״ל.` };
+}
+
+/** Adds or removes a perfume from the home page recommendations. */
+export async function toggleFeatured(id: number) {
+  await requireAdmin();
+  const p = await db.product.findUnique({ where: { id }, select: { isFeatured: true } });
+  if (!p) return;
+  await db.product.update({ where: { id }, data: { isFeatured: !p.isFeatured } });
+  revalidatePath("/admin/products");
+  revalidatePath("/");
 }

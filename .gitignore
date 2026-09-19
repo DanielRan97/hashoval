@@ -45,3 +45,6 @@ backups/
 # uploaded product images live on the server volume, not in git
 public/uploads/
 !.env.example
+
+# raw source images (the site uses the cut-outs in public/hero)
+/assets/

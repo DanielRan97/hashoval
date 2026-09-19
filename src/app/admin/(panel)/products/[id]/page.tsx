@@ -11,7 +11,7 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
   const productId = Number(id);
   if (!Number.isInteger(productId)) notFound();
   const [p, s, brandRows] = await Promise.all([
-    db.product.findUnique({ where: { id: productId } }),
+    db.product.findUnique({ where: { id: productId }, include: { images: { orderBy: { position: "asc" } } } }),
     getSettings(),
     db.brand.findMany({ orderBy: { name: "asc" } }),
   ]);
@@ -24,7 +24,7 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
         מחירים מחושבים (לקריאה בלבד): 2 מ״ל ₪{prices[2]} · 5 מ״ל ₪{prices[5]} · 10 מ״ל ₪{prices[10]}
       </p>
       <AddStockForm productId={p.id} productName={`${p.brand} ${p.name}`} currentMl={availableMl(p)} />
-      <ProductForm id={p.id} brands={brandRows.map((b) => b.name)} values={p} />
+      <ProductForm id={p.id} brands={brandRows.map((b) => b.name)} values={{ ...p, images: p.images.map((i) => i.url) }} />
     </>
   );
 }

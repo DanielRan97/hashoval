@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { getStoreProducts } from "@/lib/catalog";
+import { GENDER_LABELS } from "@/lib/gender";
 import { STOCK_LABELS } from "@/lib/stock";
-import { ProductImage } from "../../ProductImage";
+import { ProductGallery } from "../../Gallery";
 import { SizePicker } from "./SizePicker";
 import { ViewTracker } from "./ViewTracker";
 
@@ -14,9 +15,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   return (
     <div className="container product">
       <ViewTracker productId={p.id} />
-      <ProductImage url={p.imageUrl} brand={p.brand} name={p.name} />
-      <div>
-        <div className="card-brand">{p.brand}</div>
+      <ProductGallery images={p.images} alt={`${p.brand} ${p.name}`} />
+      <div className="product-info">
+        <div className="card-brand" style={{ paddingInline: 0, marginTop: 0 }}>{p.brand} · {GENDER_LABELS[p.gender]}</div>
         <h1>{p.name}</h1>
         <p><span className={`badge ${p.stock}`}>{STOCK_LABELS[p.stock]}</span></p>
         <p>{p.description}</p>

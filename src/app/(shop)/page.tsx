@@ -1,24 +1,33 @@
 import Link from "next/link";
 import { getStoreProducts } from "@/lib/catalog";
+import { getSettings } from "@/lib/db";
+import { Hero } from "./Hero";
 import { ProductCard } from "./ProductCard";
 
 export const dynamic = "force-dynamic";
 
+/** Home: the showcase, then the perfumes marked as recommended in the admin. */
 export default async function Home() {
-  const featured = (await getStoreProducts()).filter((p) => p.stock !== "out").slice(0, 3);
+  const [all, s] = await Promise.all([getStoreProducts(), getSettings()]);
+  const featured = all.filter((p) => p.isFeatured);
   return (
     <>
-      <section className="hero">
-        <h1>השובל שלך.<br />בלי פשרות, בלי הימורים.</h1>
-        <p>דוגמיות מקוריות מהבשמים הטובים בעולם, ישירות מהבקבוק. 2, 5 או 10 מ״ל — כדי לבחור בביטחון לפני שקונים בקבוק שלם.</p>
-        <Link href="/shop" className="btn">לחנות</Link>
+      <Hero />
+      <p className="intro-line">
+        דוגמיות מקוריות · 2, 5 או 10 מ״ל · משלוח חינם מעל ₪{s.freeShippingThreshold}
+      </p>
+      <section className="container recs">
+        {featured.length > 0 && (
+          <>
+            <h2 className="recs-title">המומלצים שלנו</h2>
+            <div className="grid">{featured.map((p) => <ProductCard key={p.id} p={p} />)}</div>
+          </>
+        )}
+        {all.length === 0 && <p className="muted">הבשמים יתווספו בקרוב.</p>}
+        {all.length > 0 && (
+          <p className="all-link"><Link href="/shop" className="btn ghost">לכל הבשמים</Link></p>
+        )}
       </section>
-      {featured.length > 0 && (
-        <section className="container">
-          <h2>מבחר</h2>
-          <div className="grid">{featured.map((p) => <ProductCard key={p.id} p={p} />)}</div>
-        </section>
-      )}
     </>
   );
 }

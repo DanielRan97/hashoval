@@ -83,3 +83,47 @@ describe("configProblems", () => {
     expect(configProblems({ ADMIN_PASSWORD: "a-long-unique-password-1", SESSION_SECRET: "s".repeat(48) })).toEqual([]);
   });
 });
+
+import { parseImageUrls } from "./imageUrls";
+describe("parseImageUrls", () => {
+  it("accepts our own upload urls, keeps order, drops duplicates", () => {
+    expect(parseImageUrls('["/uploads/a1-b2.png","/uploads/c3.webp","/uploads/a1-b2.png"]')).toEqual(["/uploads/a1-b2.png", "/uploads/c3.webp"]);
+  });
+  it("rejects anything else", () => {
+    expect(parseImageUrls("not json")).toBeNull();
+    expect(parseImageUrls('["https://evil.example/x.png"]')).toBeNull();
+    expect(parseImageUrls('["/uploads/../secret.png"]')).toBeNull();
+    expect(parseImageUrls(JSON.stringify(Array.from({ length: 11 }, (_, i) => `/uploads/i${i}.png`)))).toBeNull();
+  });
+});
+
+import { isGender } from "./gender";
+describe("isGender", () => {
+  it("accepts only the three audiences", () => {
+    expect(["women", "men", "unisex"].every(isGender)).toBe(true);
+    expect(isGender("kids")).toBe(false);
+    expect(isGender(undefined)).toBe(false);
+  });
+});
+
+import { sortProducts, isSortKey } from "./sort";
+describe("sortProducts", () => {
+  const mk = (name: string, fromPrice: number, day: number, sold: number, views: number) => ({ brand: "B", name, fromPrice, createdAt: new Date(2026, 0, day), sold, views });
+  const list = [mk("a", 50, 3, 1, 90), mk("b", 30, 1, 9, 10), mk("c", 70, 2, 5, 50)];
+  const names = (k: Parameters<typeof sortProducts>[1]) => sortProducts(list, k).map((p) => p.name).join("");
+  it("orders by price, date, sales and views", () => {
+    expect(names("price_desc")).toBe("cab");
+    expect(names("price_asc")).toBe("bac");
+    expect(names("newest")).toBe("acb");
+    expect(names("oldest")).toBe("bca");
+    expect(names("bestsellers")).toBe("bca");
+    expect(names("popular")).toBe("acb");
+  });
+  it("ties are broken by name", () => {
+    expect(sortProducts([mk("z", 5, 1, 0, 0), mk("y", 5, 1, 0, 0)], "price_asc").map((p) => p.name).join("")).toBe("yz");
+  });
+  it("validates keys", () => {
+    expect(isSortKey("newest")).toBe(true);
+    expect(isSortKey("cheapest")).toBe(false);
+  });
+});

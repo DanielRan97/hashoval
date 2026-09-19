@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Frank_Ruhl_Libre, Heebo } from "next/font/google";
 import "./globals.css";
 
-const serif = Frank_Ruhl_Libre({ subsets: ["hebrew", "latin"], variable: "--font-serif" });
-const sans = Heebo({ subsets: ["hebrew", "latin"], variable: "--font-sans" });
+const serif = Frank_Ruhl_Libre({ subsets: ["hebrew", "latin"], weight: ["300", "400", "500"], variable: "--font-serif" });
+const sans = Heebo({ subsets: ["hebrew", "latin"], weight: ["300", "400", "500", "600"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "hashoval — השובל שלך, בלי הימורים",
