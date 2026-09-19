@@ -20,7 +20,7 @@ async function submit(form: FormData): Promise<string | null> {
     return "הסל לא תקין";
   }
   // Honeypot: a field real visitors never see. Bots fill it in.
-  if (String(form.get("company") ?? "").trim() !== "") return "לא ניתן לשלוח את ההזמנה";
+  if (String(form.get("hp_check_7f3") ?? "").trim() !== "") return "לא ניתן לשלוח את ההזמנה";
   if (form.get("acceptTerms") !== "on") return "יש לאשר את התקנון כדי להמשיך";
 
   // Each unpaid order holds stock, so cap how many one visitor can open. Only orders that were

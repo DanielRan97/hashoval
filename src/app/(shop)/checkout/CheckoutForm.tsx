@@ -40,7 +40,9 @@ export function CheckoutForm({
       <form action={action} className="form">
         <input type="hidden" name="items" value={items} />
         <div className="hp" aria-hidden="true">
-          <label>אל תמלאו שדה זה<input name="company" tabIndex={-1} autoComplete="off" /></label>
+          {/* Honeypot. Its name must not look like a real field ("company", "website"...): browsers autofill those,
+              and that turned every first order attempt into a rejected one. */}
+          <label>אל תמלאו שדה זה<input name="hp_check_7f3" tabIndex={-1} autoComplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" /></label>
         </div>
         <label>שם מלא<input name="customerName" autoComplete="name" defaultValue={v?.customerName} required /></label>
         <label>טלפון<input name="customerPhone" type="tel" autoComplete="tel" defaultValue={v?.customerPhone} required /></label>

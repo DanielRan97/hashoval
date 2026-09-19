@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getStoreProducts } from "@/lib/catalog";
 import { GENDER_LABELS } from "@/lib/gender";
 import { STOCK_LABELS } from "@/lib/stock";
+import { BackButton } from "../../BackButton";
 import { ProductGallery } from "../../Gallery";
 import { SizePicker } from "./SizePicker";
 import { ViewTracker } from "./ViewTracker";
@@ -13,7 +14,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const p = (await getStoreProducts()).find((x) => x.id === Number(id));
   if (!p) notFound();
   return (
-    <div className="container product">
+    <div className="container">
+      <BackButton />
+      <div className="product">
       <ViewTracker productId={p.id} />
       <ProductGallery images={p.images} alt={`${p.brand} ${p.name}`} />
       <div className="product-info">
@@ -28,6 +31,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         ) : (
           <SizePicker productId={p.id} options={p.options} />
         )}
+      </div>
       </div>
     </div>
   );

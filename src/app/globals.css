@@ -722,7 +722,28 @@ body:has(.shop-wide) .site-header { max-width: 1500px; }
   .hero-pause svg { width: 1rem; height: 1rem; }
 }
 
-/* diagnostic mode of the phone carousel (?debug=1, ?mode=scroll) */
-.hero-slides.scroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
-.hero-slides.scroll::-webkit-scrollbar { display: none; }
-.hero-debug { position: absolute; z-index: 5; inset-inline: .5rem; bottom: 4.2rem; margin: 0; padding: .3rem .5rem; font: 11px/1.4 ui-monospace, monospace; color: #9ef7b0; background: rgba(0, 0, 0, .7); white-space: pre-wrap; direction: ltr; text-align: left; pointer-events: none; }
+
+/* the stock tab is a grid item on phones; without this it stretches over the whole width of the card */
+.card-stock { justify-self: start; align-self: start; }
+
+/* back button on the product page */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin-bottom: 1rem;
+  padding: .4rem 1rem .4rem 1.2rem;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .85);
+  border-radius: 999px;
+  background: var(--glass);
+  box-shadow: var(--rim), 0 8px 18px -10px rgba(20, 45, 70, .3);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  transition: transform .55s cubic-bezier(.34, 1.7, .5, 1);
+}
+.back-btn svg { width: 1.05rem; height: 1.05rem; }
+@media (hover: hover) { .back-btn:hover { transform: translateX(4px) scale(1.04); } }
+.back-btn:active { transform: scale(.93); }

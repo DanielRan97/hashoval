@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { completeShippedOrders } from "@/lib/orderFlow";
 import { logout } from "../actions";
+import { OrdersBadge } from "./OrdersBadge";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
@@ -15,12 +16,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         <Link href="/admin">לוח בקרה</Link>
         <Link href="/admin/orders">
           הזמנות
-          {toShip > 0 && (
-            <span className="nav-count inline" title="הזמנות ששולמו וממתינות למשלוח">
-              {toShip}
-              <span className="sr-only"> הזמנות ממתינות למשלוח</span>
-            </span>
-          )}
+          <OrdersBadge initial={toShip} />
         </Link>
         <Link href="/admin/income">הכנסות</Link>
         <Link href="/admin/products">מוצרים</Link>
