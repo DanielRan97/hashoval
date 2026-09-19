@@ -152,3 +152,4 @@ input[type=tel], input[type=email] { direction: ltr; text-align: end; }
 .payout-box p { margin: 0; }
 @media (max-width: 720px) { .breakdowns { grid-template-columns: 1fr; } }
 .hp { position: absolute; inset-inline-start: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.message-page { text-align: center; padding-block: 5rem; margin-inline: auto; } .message-page .actions { justify-content: center; }
