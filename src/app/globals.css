@@ -412,7 +412,7 @@ th { font-weight: 500; color: var(--muted); font-size: .78rem; letter-spacing: .
 }
 /* on phones the wide photo would be tiny, so it becomes an endless strip of the three bottles */
 .hero-slides { display: none; overflow: hidden; direction: ltr; }
-.hero-track { display: flex; width: max-content; animation: hero-marquee 28s linear infinite; will-change: transform; }
+.hero-track { display: flex; width: max-content; will-change: transform; }
 .hero-slide {
   flex: 0 0 78vw;
   aspect-ratio: 0.84;
@@ -423,7 +423,6 @@ th { font-weight: 500; color: var(--muted); font-size: .78rem; letter-spacing: .
 .hero-slide:nth-child(3n + 1) { background-position: 0% 0%; }
 .hero-slide:nth-child(3n + 2) { background-position: 50% 0%; }
 .hero-slide:nth-child(3n) { background-position: 100% 0%; }
-@keyframes hero-marquee { to { transform: translateX(-50%); } }
 
 .glass-wordmark {
   position: absolute;
@@ -654,3 +653,48 @@ body:has(.shop-wide) .site-header { max-width: 1500px; }
 .card-meta { margin-top: 0; align-self: end; }
 @media (max-width: 720px) { .card-info { min-height: 11.6rem; } }
 @media (max-width: 720px) { .card-brand { font-size: .7rem; letter-spacing: .05em; } }
+
+/* ---------- icon navigation ---------- */
+.site-header nav { align-items: center; }
+.site-header a.nav-icon { position: relative; display: grid; place-items: center; width: 2.6rem; height: 2.6rem; padding: 0; border-radius: 50%; }
+.nav-icon svg { width: 1.5rem; height: 1.5rem; }
+.nav-icon::after { /* a small glass label that appears on hover or keyboard focus */
+  content: attr(data-label);
+  position: absolute;
+  top: calc(100% + .45rem);
+  inset-inline: 50%;
+  translate: 50% 0;
+  width: max-content;
+  padding: .1rem .7rem;
+  font-size: .78rem;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, .85);
+  border-radius: 999px;
+  box-shadow: var(--rim), 0 8px 18px -8px rgba(20, 45, 70, .3);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+.nav-icon:hover::after, .nav-icon:focus-visible::after { opacity: 1; }
+.nav-count {
+  position: absolute;
+  top: .05rem;
+  inset-inline-end: .05rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 .28rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #d6ae66, var(--brass));
+  color: #fff;
+  font-size: .68rem;
+  line-height: 1.1rem;
+  text-align: center;
+  box-shadow: 0 2px 6px -1px rgba(60, 40, 10, .5);
+}
+@media (hover: none) { .nav-icon::after { display: none; } }
+/* the small count tab inside a text link (admin orders) */
+.nav-count.inline { position: static; display: inline-block; vertical-align: middle; margin-inline-start: .4rem; }

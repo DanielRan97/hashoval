@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CartProvider } from "@/lib/cart";
 import { CartLink } from "./CartLink";
+import { IconAbout, IconShop } from "./NavIcons";
 import { GlassDefs } from "./ProductImage";
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
@@ -8,11 +9,10 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     <CartProvider>
       <GlassDefs />
       <header className="site-header">
-        <Link href="/" className="logo">hashoval</Link>
-        <nav>
-          <Link href="/">בית</Link>
-          <Link href="/shop">חנות</Link>
-          <Link href="/about">אודות</Link>
+        <Link href="/" className="logo" aria-label="hashoval, לדף הבית">hashoval</Link>
+        <nav aria-label="ראשי">
+          <Link href="/shop" className="nav-icon" data-label="חנות" aria-label="חנות"><IconShop /></Link>
+          <Link href="/about" className="nav-icon" data-label="אודות" aria-label="אודות"><IconAbout /></Link>
           <CartLink />
         </nav>
       </header>

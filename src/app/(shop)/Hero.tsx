@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { HeroSlides } from "./HeroSlides";
 
 /**
  * The home page showcase: one photograph of the three bottles with their ingredients, on a dark
@@ -27,12 +28,7 @@ export function Hero() {
           </div>
         ))}
       </div>
-      {/* phones: the three bottles scroll by on their own, endlessly (the list is doubled so the loop has no seam) */}
-      <div className="hero-slides" role="img" aria-label={ALT}>
-        <div className="hero-track" aria-hidden="true">
-          {[0, 1, 2, 0, 1, 2].map((_, i) => <div key={i} className="hero-slide" />)}
-        </div>
-      </div>
+      <HeroSlides label={ALT} />
       <GlassWordmark />
     </section>
   );
