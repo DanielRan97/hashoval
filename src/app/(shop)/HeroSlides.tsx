@@ -35,6 +35,9 @@ export function HeroSlides({ label }: { label: string }) {
       last = now;
       if (!visible || paused.current) return;
       const half = el.scrollWidth / 2; // the list is doubled, so one half is exactly one loop
+      // Before the strip has a width (page still laying out) the maths would give NaN, and a NaN offset
+      // never recovers, which left the strip standing still for good.
+      if (!(half > 0)) return;
       offset = (offset + (half / LOOP_MS) * dt) % half;
       el.style.transform = `translate3d(${-offset}px, 0, 0)`;
     };
