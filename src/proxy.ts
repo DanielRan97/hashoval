@@ -12,7 +12,9 @@ export function proxy(request: NextRequest) {
   const header = request.headers.get("authorization") ?? "";
   if (header.startsWith("Basic ")) {
     try {
-      const decoded = atob(header.slice(6));
+      // atob gives a byte string; browsers send the credentials as UTF-8, so decode those bytes properly.
+      const bytes = Uint8Array.from(atob(header.slice(6)), (c) => c.charCodeAt(0));
+      const decoded = new TextDecoder().decode(bytes);
       if (decoded.slice(decoded.indexOf(":") + 1) === password) return NextResponse.next();
     } catch {}
   }
