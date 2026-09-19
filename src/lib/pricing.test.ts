@@ -1,0 +1,85 @@
+import { describe, expect, it } from "vitest";
+import { decantPrices, sellableMl, hasStockFor, fillPercentAfterSale, shippingFor } from "./pricing";
+
+const s = { spillagePercent: 5, multiplier2ml: 1.75, multiplier5ml: 1.45, multiplier10ml: 1.25 };
+// 1000 ₪ / 100 ml = 10 ₪ per ml
+const p = { bottleSizeMl: 100, currentFillPercent: 100, marketValuePerBottle: 1000 };
+
+describe("pricing", () => {
+  it("prices decants from per-ml base and multipliers", () => {
+    // 10*2*1.75=35, 10*5*1.45=72.5->73 (round), 10*10*1.25=125
+    expect(decantPrices(p, s)).toEqual({ 2: 35, 5: 73, 10: 125 });
+  });
+  it("uses odd bottle sizes", () => {
+    const q = { bottleSizeMl: 75, currentFillPercent: 100, marketValuePerBottle: 1500 }; // 20/ml
+    expect(decantPrices(q, s)[2]).toBe(70);
+  });
+});
+
+describe("stock", () => {
+  it("sellable ml applies fill and spillage", () => {
+    expect(sellableMl({ ...p, currentFillPercent: 50 }, s)).toBeCloseTo(47.5);
+  });
+  it("rejects orders over sellable ml, accepts exact", () => {
+    const half = { ...p, currentFillPercent: 10 }; // 10ml raw, 9.5 sellable
+    expect(hasStockFor(half, s, 10)).toBe(false);
+    expect(hasStockFor(half, s, 9.5)).toBe(true);
+  });
+  it("selling everything sellable empties the bottle", () => {
+    expect(fillPercentAfterSale(p, s, 95)).toBeCloseTo(0);
+  });
+  it("partial sale reduces fill including spillage", () => {
+    // 10ml sold -> 10.526 raw used -> 89.47%
+    expect(fillPercentAfterSale(p, s, 10)).toBeCloseTo(89.4737, 3);
+  });
+});
+
+describe("shipping", () => {
+  it("free at and above threshold", () => {
+    expect(shippingFor(399, 400, 30)).toBe(30);
+    expect(shippingFor(400, 400, 30)).toBe(0);
+  });
+});
+
+import { fillPercentAfterRestock } from "./pricing";
+describe("restock", () => {
+  it("is the inverse of a sale", () => {
+    const after = fillPercentAfterSale(p, s, 10);
+    expect(fillPercentAfterRestock({ ...p, currentFillPercent: after }, s, 10)).toBeCloseTo(100);
+  });
+  it("can exceed 100% when several bottles are in stock", () => {
+    expect(fillPercentAfterRestock(p, s, 47.5)).toBeCloseTo(150);
+  });
+});
+
+import { stockLevel } from "./stock";
+describe("stockLevel", () => {
+  const t = { outOfStockThresholdMl: 5, lowStockThresholdMl: 20 };
+  it("classifies by net ml", () => {
+    expect(stockLevel(4.9, t)).toBe("out");
+    expect(stockLevel(5, t)).toBe("low");
+    expect(stockLevel(19.9, t)).toBe("low");
+    expect(stockLevel(20, t)).toBe("ok");
+  });
+});
+
+import { fillPercentAfterAdding } from "./pricing";
+describe("adding stock", () => {
+  it("adds ml relative to bottle size, beyond 100%", () => {
+    const empty = { ...p, currentFillPercent: 3 }; // 3ml left
+    expect(fillPercentAfterAdding(empty, 300)).toBeCloseTo(303);
+    // 303% of a 100ml bottle = 303ml raw
+    expect(sellableMl({ ...p, currentFillPercent: 303 }, s)).toBeCloseTo(287.85);
+  });
+});
+
+import { configProblems } from "./configCheck";
+describe("configProblems", () => {
+  it("flags default or short secrets", () => {
+    expect(configProblems({ ADMIN_PASSWORD: "change-me", SESSION_SECRET: "change-me-to-a-long-random-string" })).toHaveLength(2);
+    expect(configProblems({ ADMIN_PASSWORD: "short", SESSION_SECRET: "x".repeat(40) })).toHaveLength(1);
+  });
+  it("accepts strong values", () => {
+    expect(configProblems({ ADMIN_PASSWORD: "a-long-unique-password-1", SESSION_SECRET: "s".repeat(48) })).toEqual([]);
+  });
+});

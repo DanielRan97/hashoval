@@ -1,0 +1,33 @@
+import { notFound } from "next/navigation";
+import { getStoreProducts } from "@/lib/catalog";
+import { STOCK_LABELS } from "@/lib/stock";
+import { ProductImage } from "../../ProductImage";
+import { SizePicker } from "./SizePicker";
+import { ViewTracker } from "./ViewTracker";
+
+export const dynamic = "force-dynamic";
+
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const p = (await getStoreProducts()).find((x) => x.id === Number(id));
+  if (!p) notFound();
+  return (
+    <div className="container product">
+      <ViewTracker productId={p.id} />
+      <ProductImage url={p.imageUrl} brand={p.brand} name={p.name} />
+      <div>
+        <div className="card-brand">{p.brand}</div>
+        <h1>{p.name}</h1>
+        <p><span className={`badge ${p.stock}`}>{STOCK_LABELS[p.stock]}</span></p>
+        <p>{p.description}</p>
+        {p.stock === "out" ? (
+          <div className="actions">
+            <button type="button" className="btn" disabled>המלאי אזל</button>
+          </div>
+        ) : (
+          <SizePicker productId={p.id} options={p.options} />
+        )}
+      </div>
+    </div>
+  );
+}

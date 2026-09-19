@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id                   Int         @id @default(autoincrement())
+  brand                String
+  name                 String
+  description          String      @default("")
+  imageUrl             String?
+  bottleSizeMl         Int
+  currentFillPercent   Float       @default(100)
+  marketValuePerBottle Float
+  isActive             Boolean     @default(true)
+  views                Int         @default(0)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  orderItems           OrderItem[]
+}
+
+model Brand {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+}
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  customerName    String
+  customerPhone   String
+  customerEmail   String?
+  customerAddress String
+  shippingCost    Float       @default(0)
+  totalAmount     Float
+  // pending_payment | paid | shipped | completed | rejected (cancelled) | expired
+  // legacy manual flow: pending_approval | approved
+  status          String      @default("pending_payment")
+  // Random public id for customer-facing URLs (payment / thank-you pages)
+  token           String?     @unique
+  // True while this order's ml is deducted from stock; makes release/cancel exact
+  stockDeducted   Boolean     @default(false)
+  holdExpiresAt   DateTime?
+  paymentMethod   String?     // card | apple_pay | google_pay
+  paymentProvider String?
+  providerTxnId   String?
+  paidAt          DateTime?
+  refundedAt      DateTime?
+  shippedAt       DateTime?
+  payoutDate      DateTime?
+  payoutAccount   String?
+  rejectionReason String?
+  trackingNumber  String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id          Int     @id @default(autoincrement())
+  orderId     Int
+  productId   Int
+  decantSizeMl Int
+  unitPrice   Float
+  quantity    Int     @default(1)
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product @relation(fields: [productId], references: [id])
+}
+
+// Single row (id = 1)
+model Settings {
+  id                   Int   @id @default(1)
+  spillagePercent      Float @default(5)
+  packagingCostPerUnit Float @default(3)
+  paymentFeePercent    Float @default(2.5)
+  multiplier2ml        Float @default(1.75)
+  multiplier5ml        Float @default(1.45)
+  multiplier10ml       Float @default(1.25)
+  freeShippingThreshold Float @default(400)
+  standardShippingCost Float @default(30)
+  lowStockThresholdMl  Float @default(20)
+  outOfStockThresholdMl Float @default(5)
+  paymentInstructions  String @default("")
+}
+
+// One row per counted request; used by src/lib/rateLimit.ts to limit abuse per key (e.g. "login:1.2.3.4")
+model RateLimitHit {
+  id        Int      @id @default(autoincrement())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
