@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { expireUnpaidOrders } from "@/lib/orderFlow";
 import { stockLevel } from "@/lib/stock";
-import { vialDelta, vialShortage, vialsNeeded } from "@/lib/vials";
+import { ensureVialCounts, vialDelta, vialShortage, vialsNeeded } from "@/lib/vials";
 import {
   DECANT_SIZES,
   decantPrices,
@@ -85,8 +85,8 @@ export async function createOrder(input: OrderInput): Promise<CreateOrderResult>
       await tx.product.update({ where: { id }, data: { currentFillPercent: fillPercentAfterSale(p, settings, ml) } });
     }
 
-    const taken = vialDelta(settings, vials, -1);
-    if (Object.keys(taken).length > 0) await tx.settings.update({ where: { id: 1 }, data: taken });
+    await ensureVialCounts(tx);
+    await tx.settings.update({ where: { id: 1 }, data: vialDelta(vials, -1) });
 
     const subtotal = lines.reduce((s, l) => s + l.unitPrice * l.quantity, 0);
     const shippingCost = shippingFor(subtotal, settings.freeShippingThreshold, settings.standardShippingCost);

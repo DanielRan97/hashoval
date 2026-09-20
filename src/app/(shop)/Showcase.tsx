@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { Photo } from "./Gallery";
 
 export type ShowcaseItem = { id: number; brand: string; name: string; image: string; price: string };
 
@@ -120,7 +121,7 @@ export function Showcase({ all, initial }: { all: ShowcaseItem[]; initial: Showc
                 tabIndex={copy === 1 ? -1 : undefined}
               >
                 <span className="showcase-photo">
-                  <img src={p.image} alt={copy === 0 ? `${p.brand} ${p.name}` : ""} draggable={false} loading={copy === 0 && i < 4 ? "eager" : "lazy"} decoding="async" />
+                  <Photo src={p.image} alt={copy === 0 ? `${p.brand} ${p.name}` : ""} eager={copy === 0 && i < 4} />
                 </span>
                 <span className="showcase-caption">
                   <span className="showcase-brand">{p.brand}</span>

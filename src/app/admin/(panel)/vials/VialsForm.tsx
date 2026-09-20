@@ -4,8 +4,7 @@ import { useActionState } from "react";
 import { saveVials, type VialsResult } from "../../actions";
 import { VIAL_SIZES, vialLevel, type VialSettings } from "@/lib/vials";
 
-const LEVEL_LABEL = { untracked: "לא במעקב", ok: "תקין", low: "עומד להיגמר", out: "אזל" } as const;
-const LEVEL_CLASS = { untracked: "", ok: "ok", low: "low", out: "out" } as const;
+const LEVEL_LABEL = { ok: "תקין", low: "עומד להיגמר", out: "אזל" } as const;
 
 export function VialsForm({ values }: { values: VialSettings }) {
   const [result, action, pending] = useActionState<VialsResult, FormData>(saveVials, null);
@@ -17,9 +16,9 @@ export function VialsForm({ values }: { values: VialSettings }) {
           <label key={size}>
             <span>
               בקבוקוני {size} מ״ל במלאי{" "}
-              {level !== "untracked" && <span className={`badge sm ${LEVEL_CLASS[level]}`}>{LEVEL_LABEL[level]}</span>}
+              <span className={`badge sm ${level}`}>{LEVEL_LABEL[level]}</span>
             </span>
-            <input type="number" name={`vials${size}`} min={0} step={1} defaultValue={values[`vials${size}ml` as const] ?? ""} placeholder="ריק = לא לעקוב" />
+            <input type="number" name={`vials${size}`} min={0} step={1} defaultValue={values[`vials${size}ml` as const] ?? 0} required />
           </label>
         );
       })}

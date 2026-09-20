@@ -195,9 +195,9 @@ input[type=checkbox] { accent-color: var(--ink); width: 1.05rem; height: 1.05rem
 
 /* photos: stacked and cross-faded; square, no frame */
 .gallery { position: relative; aspect-ratio: 1; overflow: hidden; background: rgba(255, 255, 255, .45); }
-.gallery > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 2%; opacity: 0; transition: opacity .45s; } /* whole bottle visible, a little air around it */
+.gallery > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .45s; } /* photos fill the whole frame */
 .gallery > img.on { opacity: 1; }
-.gallery > img.cutout { padding: 6%; } /* transparent background: zoomed out a bit more */
+.gallery > img.cutout { object-fit: contain; padding: 9%; } /* transparent background: the whole bottle, on the dark glass */
 .gallery-empty { position: absolute; inset: 0; display: grid; place-items: center; background: radial-gradient(120% 100% at 30% 8%, #fff, rgba(255, 255, 255, .5)); }
 .gallery-dots { position: absolute; inset-inline: 0; bottom: .6rem; display: flex; justify-content: center; gap: .3rem; pointer-events: none; }
 .gallery-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, .55); box-shadow: 0 0 0 1px rgba(20, 45, 70, .18); }
@@ -757,15 +757,18 @@ h1, h2, h3 { font-weight: 300; letter-spacing: .01em; }
 select option { background: #15171a; color: var(--ink); }
 ::placeholder { color: #7d776c; }
 
-/* photos sit on a soft studio plate, so photos and transparent cut-outs all look the same */
-.card-media, .gallery, .thumbs button, .upload-thumb {
-  background: radial-gradient(110% 90% at 50% 25%, #f6f3ec, #dcd6ca);
+/* photos fill their frame; behind a transparent cut-out is dark, see-through glass */
+.card-media, .gallery, .thumbs button, .upload-thumb, .showcase-photo {
+  background: linear-gradient(135deg, rgba(34, 37, 42, .72), rgba(8, 9, 11, .55));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 0 0 1px rgba(255, 255, 255, .07);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
 }
 .gallery-empty { background: none; }
 .card-media::after { background: linear-gradient(112deg, transparent 38%, rgba(255, 255, 255, .28) 50%, transparent 62%); }
-.gallery-dots i { background: rgba(20, 24, 27, .28); box-shadow: none; }
-.gallery-dots i.on { background: #14181b; }
-.thumb { background: #ddd8cc; box-shadow: 0 0 0 1px rgba(255, 255, 255, .15); }
+.gallery-dots i { background: rgba(255, 255, 255, .55); box-shadow: 0 0 0 1px rgba(0, 0, 0, .35); }
+.gallery-dots i.on { background: #fff; }
+.thumb { background: #1a1c20; box-shadow: 0 0 0 1px rgba(255, 255, 255, .15); }
 .upload-main { color: #14181b; }
 
 /* product cards: same plate, then a quiet panel; nothing bounces */
@@ -854,11 +857,11 @@ tbody tr:hover { background: rgba(255, 255, 255, .04); }
 .showcase-photo {
   display: block;
   aspect-ratio: 1;
-  background: radial-gradient(110% 90% at 50% 25%, #f6f3ec, #dcd6ca);
   box-shadow: 0 26px 40px -24px rgba(0, 0, 0, .9);
   overflow: hidden;
 }
-.showcase-photo img { display: block; width: 100%; height: 100%; object-fit: contain; padding: 2%; pointer-events: none; }
+.showcase-photo img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.showcase-photo img.cutout { object-fit: contain; padding: 9%; }
 .showcase-caption { display: grid; gap: .1rem; padding: .75rem .1rem 0; text-align: center; }
 .showcase-brand { color: var(--muted); font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; }
 .showcase-name { font-family: var(--font-serif), serif; font-size: 1.15rem; font-weight: 300; line-height: 1.3; }

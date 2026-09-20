@@ -4,7 +4,7 @@ import { sendEmail } from "@/lib/email";
 import { notifyOrderPaid, notifyOrderShipped } from "@/lib/notify";
 import { getPaymentProcessor, type PaymentMethod } from "@/lib/payments";
 import { fillPercentAfterRestock } from "@/lib/pricing";
-import { vialDelta, vialsNeeded } from "@/lib/vials";
+import { ensureVialCounts, vialDelta, vialsNeeded } from "@/lib/vials";
 
 export const STATUS_LABELS: Record<string, string> = {
   pending_payment: "ממתינה לתשלום",
@@ -45,8 +45,8 @@ async function restoreStock(tx: Tx, items: { productId: number; decantSizeMl: nu
       data: { currentFillPercent: fillPercentAfterRestock(p, settings, ml) },
     });
   }
-  const back = vialDelta(settings, vialsNeeded(items), 1);
-  if (Object.keys(back).length > 0) await tx.settings.update({ where: { id: 1 }, data: back });
+  await ensureVialCounts(tx);
+  await tx.settings.update({ where: { id: 1 }, data: vialDelta(vialsNeeded(items), 1) });
 }
 
 /**

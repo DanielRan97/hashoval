@@ -198,15 +198,15 @@ export async function toggleFeatured(id: number) {
 
 export type VialsResult = { ok: boolean; msg: string } | null;
 
-/** Saves the empty sample-vial counts. An empty box means "do not track this size". */
+/** Saves the empty sample-vial counts. An empty box counts as 0. */
 export async function saveVials(_: VialsResult, form: FormData): Promise<VialsResult> {
   await requireAdmin();
   const data: { vials2ml: number | null; vials5ml: number | null; vials10ml: number | null; vialLowThreshold: number } = {
-    vials2ml: null, vials5ml: null, vials10ml: null, vialLowThreshold: 10,
+    vials2ml: 0, vials5ml: 0, vials10ml: 0, vialLowThreshold: 10,
   };
   for (const size of [2, 5, 10] as const) {
     const raw = String(form.get(`vials${size}`) ?? "").trim();
-    if (raw === "") continue;
+    if (raw === "") { data[`vials${size}ml`] = 0; continue; }
     const n = Number(raw);
     if (!Number.isInteger(n) || n < 0) return { ok: false, msg: `כמות לא תקינה בדוגמיות ${size} מ״ל` };
     data[`vials${size}ml`] = n;

@@ -21,7 +21,7 @@ function hasTransparentCorners(img: HTMLImageElement) {
  * A photo that is drawn a little smaller when its background is transparent. A cut-out bottle fills
  * the whole frame otherwise, which looks too close next to normal photos.
  */
-function Photo({ src, alt, className, eager }: { src: string; alt: string; className?: string; eager?: boolean }) {
+export function Photo({ src, alt, className, eager }: { src: string; alt: string; className?: string; eager?: boolean }) {
   const [cutout, setCutout] = useState(false);
   const ref = useCallback((img: HTMLImageElement | null) => {
     if (!img) return;
@@ -36,6 +36,7 @@ function Photo({ src, alt, className, eager }: { src: string; alt: string; class
       alt={alt}
       className={[className, cutout ? "cutout" : ""].filter(Boolean).join(" ") || undefined}
       loading={eager === undefined ? undefined : eager ? "eager" : "lazy"}
+      decoding="async"
       draggable={false}
     />
   );
