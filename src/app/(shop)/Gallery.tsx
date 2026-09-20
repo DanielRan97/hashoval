@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { fxStyle, type PhotoData, type PhotoFx } from "@/lib/photoFx";
 import { EmptyBottle } from "./ProductImage";
 
 /** True when the photo has see-through corners (a cut-out on a transparent background). */
@@ -21,7 +22,7 @@ function hasTransparentCorners(img: HTMLImageElement) {
  * A photo that is drawn a little smaller when its background is transparent. A cut-out bottle fills
  * the whole frame otherwise, which looks too close next to normal photos.
  */
-export function Photo({ src, alt, className, eager }: { src: string; alt: string; className?: string; eager?: boolean }) {
+export function Photo({ src, alt, className, eager, fx }: { src: string; alt: string; className?: string; eager?: boolean; fx?: PhotoFx }) {
   const [cutout, setCutout] = useState(false);
   const ref = useCallback((img: HTMLImageElement | null) => {
     if (!img) return;
@@ -37,6 +38,7 @@ export function Photo({ src, alt, className, eager }: { src: string; alt: string
       className={[className, cutout ? "cutout" : ""].filter(Boolean).join(" ") || undefined}
       loading={eager === undefined ? undefined : eager ? "eager" : "lazy"}
       decoding="async"
+      style={fxStyle(fx)}
       draggable={false}
     />
   );
@@ -46,7 +48,7 @@ export function Photo({ src, alt, className, eager }: { src: string; alt: string
  * A product's photos, stacked and cross-faded. With `scrub`, moving the mouse across the image flips
  * through the photos (in reading direction); leaving returns to the main one. Touch screens keep the main one.
  */
-export function Gallery({ images, alt, scrub = false }: { images: string[]; alt: string; scrub?: boolean }) {
+export function Gallery({ images, alt, scrub = false }: { images: PhotoData[]; alt: string; scrub?: boolean }) {
   const [index, setIndex] = useState(0);
   if (images.length === 0) {
     return (
@@ -71,12 +73,12 @@ export function Gallery({ images, alt, scrub = false }: { images: string[]; alt:
       }
       onPointerLeave={scrub ? () => setIndex(0) : undefined}
     >
-      {images.map((src, i) => (
-        <Photo key={src} src={src} alt={i === 0 ? alt : ""} className={i === index ? "on" : undefined} eager={i === 0} />
+      {images.map((img, i) => (
+        <Photo key={img.url} src={img.url} fx={img} alt={i === 0 ? alt : ""} className={i === index ? "on" : undefined} eager={i === 0} />
       ))}
       {scrub && images.length > 1 && (
         <span className="gallery-dots" aria-hidden="true">
-          {images.map((src, i) => <i key={src} className={i === index ? "on" : undefined} />)}
+          {images.map((img, i) => <i key={img.url} className={i === index ? "on" : undefined} />)}
         </span>
       )}
     </div>
@@ -84,7 +86,7 @@ export function Gallery({ images, alt, scrub = false }: { images: string[]; alt:
 }
 
 /** The product page gallery: a large photo and thumbnails to choose from. */
-export function ProductGallery({ images, alt }: { images: string[]; alt: string }) {
+export function ProductGallery({ images, alt }: { images: PhotoData[]; alt: string }) {
   const [index, setIndex] = useState(0);
   return (
     <div className="product-gallery">
@@ -92,14 +94,14 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
         {images.length === 0 ? (
           <div className="gallery-empty"><EmptyBottle /></div>
         ) : (
-          images.map((src, i) => <Photo key={src} src={src} alt={i === index ? alt : ""} className={i === index ? "on" : undefined} />)
+          images.map((img, i) => <Photo key={img.url} src={img.url} fx={img} alt={i === index ? alt : ""} className={i === index ? "on" : undefined} />)
         )}
       </div>
       {images.length > 1 && (
         <div className="thumbs" role="tablist" aria-label="תמונות">
-          {images.map((src, i) => (
-            <button key={src} type="button" role="tab" aria-selected={i === index} className={i === index ? "on" : undefined} onClick={() => setIndex(i)}>
-              <img src={src} alt="" draggable={false} />
+          {images.map((img, i) => (
+            <button key={img.url} type="button" role="tab" aria-selected={i === index} className={i === index ? "on" : undefined} onClick={() => setIndex(i)}>
+              <img src={img.url} alt="" draggable={false} />
             </button>
           ))}
         </div>

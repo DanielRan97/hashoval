@@ -7,6 +7,7 @@ import { configProblems } from "@/lib/configCheck";
 import { clientIp, minutes, recordHit, retryAfterSeconds } from "@/lib/rateLimit";
 import { db } from "@/lib/db";
 import { isGender } from "@/lib/gender";
+import { clampFx } from "@/lib/photoFx";
 import { parseImageUrls } from "@/lib/imageUrls";
 import { deleteUnusedFiles, setProductImages } from "@/lib/productImages";
 
@@ -219,4 +220,17 @@ export async function saveVials(_: VialsResult, form: FormData): Promise<VialsRe
   revalidatePath("/shop");
   revalidatePath("/");
   return { ok: true, msg: "נשמר" };
+}
+
+/** Saves how one product photo is framed (zoom and shift). Shown in the shop, the product page and the home strip. */
+export async function saveImageFx(imageId: number, zoom: number, x: number, y: number): Promise<string | null> {
+  await requireAdmin();
+  const img = await db.productImage.findUnique({ where: { id: imageId }, select: { productId: true } });
+  if (!img) return "התמונה לא נמצאה";
+  const fx = clampFx({ zoom, x, y });
+  await db.productImage.update({ where: { id: imageId }, data: { zoom: fx.zoom, offsetX: fx.x, offsetY: fx.y } });
+  revalidatePath("/shop");
+  revalidatePath("/");
+  revalidatePath(`/product/${img.productId}`);
+  return null;
 }

@@ -2,6 +2,7 @@ import { db, getSettings } from "@/lib/db";
 import { isGender, type Gender } from "@/lib/gender";
 import { expireUnpaidOrders, INCOME_STATUSES } from "@/lib/orderFlow";
 import { stockLevel, type StockLevel } from "@/lib/stock";
+import { NO_FX, type PhotoData } from "@/lib/photoFx";
 import { vialsAvailable } from "@/lib/vials";
 import { DECANT_SIZES, decantPrices, sellableMl, type DecantSize } from "@/lib/pricing";
 
@@ -11,7 +12,7 @@ export type StoreProduct = {
   name: string;
   description: string;
   /** Photos in display order; the first is the main one. Empty when the product has none yet. */
-  images: string[];
+  images: PhotoData[];
   stock: StockLevel;
   createdAt: Date;
   isFeatured: boolean;
@@ -54,7 +55,7 @@ export async function getStoreProducts(): Promise<StoreProduct[]> {
       brand: p.brand,
       name: p.name,
       description: p.description,
-      images: p.images.length > 0 ? p.images.map((i) => i.url) : p.imageUrl ? [p.imageUrl] : [],
+      images: p.images.length > 0 ? p.images.map((i) => ({ url: i.url, zoom: i.zoom, x: i.offsetX, y: i.offsetY })) : p.imageUrl ? [{ url: p.imageUrl, ...NO_FX }] : [],
       createdAt: p.createdAt,
       isFeatured: p.isFeatured,
       gender: isGender(p.gender) ? p.gender : "unisex",

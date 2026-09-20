@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import type { PhotoData } from "@/lib/photoFx";
 import { Photo } from "./Gallery";
 
-export type ShowcaseItem = { id: number; brand: string; name: string; image: string; price: string };
+export type ShowcaseItem = { id: number; brand: string; name: string; image: PhotoData; price: string };
 
 const SHOWN = 10;
 const SPEED = 42; // pixels per second: slow enough to read, quick enough to feel alive
@@ -121,7 +122,7 @@ export function Showcase({ all, initial }: { all: ShowcaseItem[]; initial: Showc
                 tabIndex={copy === 1 ? -1 : undefined}
               >
                 <span className="showcase-photo">
-                  <Photo src={p.image} alt={copy === 0 ? `${p.brand} ${p.name}` : ""} eager={copy === 0 && i < 4} />
+                  <Photo src={p.image.url} fx={p.image} alt={copy === 0 ? `${p.brand} ${p.name}` : ""} eager={copy === 0 && i < 4} />
                 </span>
                 <span className="showcase-caption">
                   <span className="showcase-brand">{p.brand}</span>

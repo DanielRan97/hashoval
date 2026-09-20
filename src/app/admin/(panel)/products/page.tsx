@@ -2,6 +2,7 @@ import Link from "next/link";
 import { deleteProduct } from "../../actions";
 import { DeleteButton } from "../DeleteButton";
 import { FeaturedToggle } from "./FeaturedToggle";
+import { ImageZoom } from "./ImageZoom";
 import { db, getSettings } from "@/lib/db";
 import { availableMl, decantPrices, sellableMl } from "@/lib/pricing";
 import { GENDER_LABELS, isGender } from "@/lib/gender";
@@ -16,7 +17,7 @@ export default async function ProductsPage({
 }) {
   const { q = "", inStock } = await searchParams;
   const [all, s, ordered] = await Promise.all([
-    db.product.findMany({ orderBy: [{ brand: "asc" }, { name: "asc" }] }),
+    db.product.findMany({ orderBy: [{ brand: "asc" }, { name: "asc" }], include: { images: { orderBy: { position: "asc" } } } }),
     getSettings(),
     // Units ordered per product, not counting rejected/cancelled orders.
     db.orderItem.groupBy({
@@ -65,9 +66,9 @@ export default async function ProductsPage({
               const prices = decantPrices(p, s);
               return (
                 <tr key={p.id}>
-                  <td>{p.imageUrl && <img className="thumb" src={p.imageUrl} alt="" />}</td>
+                  <td><ImageZoom images={p.images.map((i) => ({ id: i.id, url: i.url, zoom: i.zoom, x: i.offsetX, y: i.offsetY }))} fallbackUrl={p.imageUrl} alt={`${p.brand} ${p.name}`} /></td>
                   <td>{p.brand}</td>
-                  <td>{p.name}</td>
+                  <td><Link href={`/product/${p.id}`}>{p.name}</Link></td>
                   <td>{isGender(p.gender) ? GENDER_LABELS[p.gender] : "—"}</td>
                   <td>
                     {availableMl(p).toFixed(1)}
