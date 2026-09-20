@@ -7,7 +7,8 @@ const LOOP_MS = 28_000; // time for the three bottles to pass once
 /**
  * The phone version of the home showcase: the three bottles scroll by endlessly. The motion is driven
  * from script rather than a CSS animation, so it does not depend on the browser starting one. It
- * pauses while off screen. It deliberately does not follow the device's "reduce motion" setting (the
+ * stops with the tab (the browser stops calling back); it does not use an IntersectionObserver, which
+ * is a suspect for the strip standing still on iPhones. It deliberately does not follow the device's "reduce motion" setting (the
  * owner wants it always moving; on an iPhone with that setting on, following it left the strip
  * standing still); a small button lets anyone stop and resume it instead.
  */
@@ -23,17 +24,12 @@ export function HeroSlides({ label }: { label: string }) {
     let frame = 0;
     let offset = 0;
     let last = 0;
-    let visible = true;
-    const observer = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-    });
-    observer.observe(el);
 
     const step = (now: number) => {
       frame = requestAnimationFrame(step);
       const dt = Math.min(64, now - (last || now)); // a long gap (tab in the background) must not make it jump
       last = now;
-      if (!visible || paused.current) return;
+      if (paused.current) return;
       const half = el.scrollWidth / 2; // the list is doubled, so one half is exactly one loop
       // Before the strip has a width (page still laying out) the maths would give NaN, and a NaN offset
       // never recovers, which left the strip standing still for good.
@@ -44,7 +40,6 @@ export function HeroSlides({ label }: { label: string }) {
     frame = requestAnimationFrame(step);
     return () => {
       cancelAnimationFrame(frame);
-      observer.disconnect();
     };
   }, []);
 
