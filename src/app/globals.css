@@ -919,3 +919,49 @@ tbody tr:hover { background: rgba(255, 255, 255, .04); }
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
+
+/* ---------- home: the favourite perfume ---------- */
+.favorite {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  align-items: center;
+  margin: 3.5rem 0 3rem;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, .11);
+  border-radius: 28px;
+  box-shadow: var(--rim), var(--lift);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+.favorite-photo { border-radius: 18px; overflow: hidden; }
+.favorite-info { display: grid; gap: .55rem; justify-items: start; padding-inline: clamp(.25rem, 1.5vw, 1rem); }
+.favorite-tag {
+  padding: .1rem .9rem;
+  color: #17120a;
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: .12em;
+  background: linear-gradient(180deg, #e0bd7c, #b98f4a);
+  border-radius: 999px;
+}
+.favorite-name { margin: 0; font-size: clamp(1.9rem, 3.6vw, 2.9rem); font-weight: 300; line-height: 1.15; }
+.favorite-text {
+  margin: .3rem 0 0;
+  max-width: 34rem;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.favorite-foot { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; margin-top: .8rem; }
+.favorite-price { font-family: var(--font-serif), serif; font-size: 1.6rem; color: var(--brass); }
+@media (max-width: 720px) {
+  .favorite { grid-template-columns: 1fr; margin: 2.5rem 0 2rem; }
+}
+.recs .recs-title:not(:first-child) { margin-top: 3rem; }
+
+.recs .grid.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) { .recs .grid.grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
