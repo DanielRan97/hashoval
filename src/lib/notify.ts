@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
+import { VIAL_SIZES, vialLevel, vialStock } from "@/lib/vials";
 
 type FullOrder = NonNullable<Awaited<ReturnType<typeof loadOrder>>>;
 
@@ -44,6 +45,19 @@ export async function notifyOrderPaid(orderId: number) {
       `הזמנה חדשה ששולמה, מספר ${o.id}, ₪${o.totalAmount}`,
       [`${o.customerName} · ${o.customerPhone}`, o.customerAddress, "", summary(o), "", "לטיפול: לוח הבקרה ← הזמנות"].join("\n"),
     );
+    // if this order used up vials of a size that is now low or gone, say so
+    const s = await db.settings.findUnique({ where: { id: 1 } });
+    if (s) {
+      const used = new Set(o.items.map((i) => i.decantSizeMl));
+      const low = VIAL_SIZES.filter((size) => used.has(size) && ["low", "out"].includes(vialLevel(s, size)));
+      if (low.length > 0) {
+        await sendEmail(
+          owner,
+          "בקבוקוני דוגמית עומדים להיגמר",
+          [...low.map((size) => `${size} מ״ל: ${vialLevel(s, size) === "out" ? "אזלו" : `נשארו ${vialStock(s, size)}`}`), "", "לעדכון: לוח הבקרה ← בקבוקונים"].join("\n"),
+        );
+      }
+    }
   } else {
     console.log(`[OWNER_EMAIL not set] paid order ${o.id} was not announced by email`);
   }

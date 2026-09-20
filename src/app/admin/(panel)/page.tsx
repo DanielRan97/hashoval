@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db, getSettings } from "@/lib/db";
 import { INCOME_STATUSES } from "@/lib/orderFlow";
 import { sellableMl } from "@/lib/pricing";
+import { VIAL_SIZES, vialLevel, vialStock } from "@/lib/vials";
 
 export const dynamic = "force-dynamic";
 
@@ -19,9 +20,19 @@ export default async function Dashboard() {
     getSettings(),
   ]);
   const low = products.filter((p) => sellableMl(p, s) < s.lowStockThresholdMl);
+  const vialAlerts = VIAL_SIZES.map((size) => ({ size, level: vialLevel(s, size), left: vialStock(s, size) })).filter(
+    (v) => v.level === "low" || v.level === "out",
+  );
   return (
     <>
       <h1>לוח בקרה</h1>
+      {vialAlerts.length > 0 && (
+        <div className="notice" role="alert">
+          <strong>בקבוקוני דוגמית מתמעטים:</strong>{" "}
+          {vialAlerts.map((v) => `${v.size} מ״ל ${v.level === "out" ? "אזלו" : `נשארו ${v.left}`}`).join(" · ")}{" "}
+          · <Link href="/admin/vials">לעדכון המלאי</Link>
+        </div>
+      )}
       <div className="stats">
         <Link href="/admin/orders" className="stat">
           <span className={pending > 0 ? "num warn" : "num"}>{pending}</span>

@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { expireUnpaidOrders } from "@/lib/orderFlow";
 import { stockLevel } from "@/lib/stock";
+import { vialDelta, vialShortage, vialsNeeded } from "@/lib/vials";
 import {
   DECANT_SIZES,
   decantPrices,
@@ -76,10 +77,16 @@ export async function createOrder(input: OrderInput): Promise<CreateOrderResult>
         return { ok: false, error: `אין כרגע מספיק מ״ל מ-${p.brand} ${p.name}. נא להקטין כמות או גודל.` };
       }
     }
+    const vials = vialsNeeded(lines.map((l) => ({ decantSizeMl: l.decantSizeMl, quantity: l.quantity })));
+    const short = vialShortage(settings, vials);
+    if (short !== null) return { ok: false, error: `אין כרגע מספיק דוגמיות של ${short} מ״ל. נא להקטין כמות או לבחור גודל אחר.` };
     for (const [id, ml] of mlByProduct) {
       const p = byId.get(id)!;
       await tx.product.update({ where: { id }, data: { currentFillPercent: fillPercentAfterSale(p, settings, ml) } });
     }
+
+    const taken = vialDelta(settings, vials, -1);
+    if (Object.keys(taken).length > 0) await tx.settings.update({ where: { id: 1 }, data: taken });
 
     const subtotal = lines.reduce((s, l) => s + l.unitPrice * l.quantity, 0);
     const shippingCost = shippingFor(subtotal, settings.freeShippingThreshold, settings.standardShippingCost);

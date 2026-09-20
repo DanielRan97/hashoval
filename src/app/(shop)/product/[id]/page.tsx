@@ -22,7 +22,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       <div className="product-info">
         <div className="card-brand" style={{ paddingInline: 0, marginTop: 0 }}>{p.brand} · {GENDER_LABELS[p.gender]}</div>
         <h1>{p.name}</h1>
-        {p.stock !== "ok" && <p><span className={`badge ${p.stock}`}>{STOCK_LABELS[p.stock]}</span></p>}
+        <p><span className={`badge ${p.stock}`}>{STOCK_LABELS[p.stock]}</span></p>
         <p>{p.description}</p>
         {p.stock === "out" ? (
           <div className="actions">

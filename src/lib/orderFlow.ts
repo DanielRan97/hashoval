@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/email";
 import { notifyOrderPaid, notifyOrderShipped } from "@/lib/notify";
 import { getPaymentProcessor, type PaymentMethod } from "@/lib/payments";
 import { fillPercentAfterRestock } from "@/lib/pricing";
+import { vialDelta, vialsNeeded } from "@/lib/vials";
 
 export const STATUS_LABELS: Record<string, string> = {
   pending_payment: "ממתינה לתשלום",
@@ -34,7 +35,7 @@ function mlByProduct(items: { productId: number; decantSizeMl: number; quantity:
   return m;
 }
 
-/** Puts an order's ml back into stock. Callers must have flipped `stockDeducted` themselves. */
+/** Puts an order's ml (and its empty vials) back into stock. Callers must have flipped `stockDeducted` themselves. */
 async function restoreStock(tx: Tx, items: { productId: number; decantSizeMl: number; quantity: number }[]) {
   const settings = await tx.settings.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } });
   for (const [productId, ml] of mlByProduct(items)) {
@@ -44,6 +45,8 @@ async function restoreStock(tx: Tx, items: { productId: number; decantSizeMl: nu
       data: { currentFillPercent: fillPercentAfterRestock(p, settings, ml) },
     });
   }
+  const back = vialDelta(settings, vialsNeeded(items), 1);
+  if (Object.keys(back).length > 0) await tx.settings.update({ where: { id: 1 }, data: back });
 }
 
 /**

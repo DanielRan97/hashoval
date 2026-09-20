@@ -21,6 +21,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         <Link href="/admin/income">הכנסות</Link>
         <Link href="/admin/products">מוצרים</Link>
         <Link href="/admin/brands">חברות</Link>
+        <Link href="/admin/vials">בקבוקונים</Link>
         <Link href="/admin/settings">הגדרות</Link>
         <Link href="/admin/backup">גיבוי</Link>
         <span className="grow" />

@@ -2,6 +2,7 @@ import { db, getSettings } from "@/lib/db";
 import { isGender, type Gender } from "@/lib/gender";
 import { expireUnpaidOrders, INCOME_STATUSES } from "@/lib/orderFlow";
 import { stockLevel, type StockLevel } from "@/lib/stock";
+import { vialsAvailable } from "@/lib/vials";
 import { DECANT_SIZES, decantPrices, sellableMl, type DecantSize } from "@/lib/pricing";
 
 export type StoreProduct = {
@@ -47,7 +48,7 @@ export async function getStoreProducts(): Promise<StoreProduct[]> {
     const stock = stockLevel(net, s);
     const prices = decantPrices(p, s);
     const options =
-      stock === "out" ? [] : DECANT_SIZES.filter((size) => size <= net).map((size) => ({ size, price: prices[size] }));
+      stock === "out" ? [] : DECANT_SIZES.filter((size) => size <= net && vialsAvailable(s, size)).map((size) => ({ size, price: prices[size] }));
     return {
       id: p.id,
       brand: p.brand,

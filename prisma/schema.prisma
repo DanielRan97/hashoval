@@ -99,6 +99,11 @@ model Settings {
   standardShippingCost Float @default(30)
   lowStockThresholdMl  Float @default(20)
   outOfStockThresholdMl Float @default(5)
+  // Empty sample vials in stock, per size. null = not tracked (the size is never limited by vials).
+  vials2ml             Int?
+  vials5ml             Int?
+  vials10ml            Int?
+  vialLowThreshold     Int   @default(10)
   paymentInstructions  String @default("")
 }
 

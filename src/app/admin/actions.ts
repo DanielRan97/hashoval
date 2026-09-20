@@ -195,3 +195,28 @@ export async function toggleFeatured(id: number) {
   revalidatePath("/admin/products");
   revalidatePath("/");
 }
+
+export type VialsResult = { ok: boolean; msg: string } | null;
+
+/** Saves the empty sample-vial counts. An empty box means "do not track this size". */
+export async function saveVials(_: VialsResult, form: FormData): Promise<VialsResult> {
+  await requireAdmin();
+  const data: { vials2ml: number | null; vials5ml: number | null; vials10ml: number | null; vialLowThreshold: number } = {
+    vials2ml: null, vials5ml: null, vials10ml: null, vialLowThreshold: 10,
+  };
+  for (const size of [2, 5, 10] as const) {
+    const raw = String(form.get(`vials${size}`) ?? "").trim();
+    if (raw === "") continue;
+    const n = Number(raw);
+    if (!Number.isInteger(n) || n < 0) return { ok: false, msg: `כמות לא תקינה בדוגמיות ${size} מ״ל` };
+    data[`vials${size}ml`] = n;
+  }
+  const low = Number(String(form.get("vialLowThreshold") ?? ""));
+  if (!Number.isInteger(low) || low < 0) return { ok: false, msg: "סף ההתראה חייב להיות מספר שלם" };
+  data.vialLowThreshold = low;
+  await db.settings.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } });
+  revalidatePath("/admin", "layout");
+  revalidatePath("/shop");
+  revalidatePath("/");
+  return { ok: true, msg: "נשמר" };
+}
