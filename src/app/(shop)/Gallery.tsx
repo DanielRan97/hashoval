@@ -1,7 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { EmptyBottle } from "./ProductImage";
+
+/** True when the photo has see-through corners (a cut-out on a transparent background). */
+function hasTransparentCorners(img: HTMLImageElement) {
+  try {
+    const c = document.createElement("canvas");
+    c.width = c.height = 16;
+    const ctx = c.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return false;
+    ctx.drawImage(img, 0, 0, 16, 16);
+    return [0, 15].some((x) => [0, 15].some((y) => ctx.getImageData(x, y, 1, 1).data[3] < 250));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * A photo that is drawn a little smaller when its background is transparent. A cut-out bottle fills
+ * the whole frame otherwise, which looks too close next to normal photos.
+ */
+function Photo({ src, alt, className, eager }: { src: string; alt: string; className?: string; eager?: boolean }) {
+  const [cutout, setCutout] = useState(false);
+  const ref = useCallback((img: HTMLImageElement | null) => {
+    if (!img) return;
+    const check = () => setCutout(hasTransparentCorners(img));
+    if (img.complete && img.naturalWidth > 0) check(); // already loaded before this ran
+    else img.addEventListener("load", check, { once: true });
+  }, []);
+  return (
+    <img
+      ref={ref}
+      src={src}
+      alt={alt}
+      className={[className, cutout ? "cutout" : ""].filter(Boolean).join(" ") || undefined}
+      loading={eager === undefined ? undefined : eager ? "eager" : "lazy"}
+      draggable={false}
+    />
+  );
+}
 
 /**
  * A product's photos, stacked and cross-faded. With `scrub`, moving the mouse across the image flips
@@ -33,7 +71,7 @@ export function Gallery({ images, alt, scrub = false }: { images: string[]; alt:
       onPointerLeave={scrub ? () => setIndex(0) : undefined}
     >
       {images.map((src, i) => (
-        <img key={src} src={src} alt={i === 0 ? alt : ""} className={i === index ? "on" : undefined} loading={i === 0 ? "eager" : "lazy"} draggable={false} />
+        <Photo key={src} src={src} alt={i === 0 ? alt : ""} className={i === index ? "on" : undefined} eager={i === 0} />
       ))}
       {scrub && images.length > 1 && (
         <span className="gallery-dots" aria-hidden="true">
@@ -53,7 +91,7 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
         {images.length === 0 ? (
           <div className="gallery-empty"><EmptyBottle /></div>
         ) : (
-          images.map((src, i) => <img key={src} src={src} alt={i === index ? alt : ""} className={i === index ? "on" : undefined} draggable={false} />)
+          images.map((src, i) => <Photo key={src} src={src} alt={i === index ? alt : ""} className={i === index ? "on" : undefined} />)
         )}
       </div>
       {images.length > 1 && (
