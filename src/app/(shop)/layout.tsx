@@ -3,11 +3,13 @@ import { CartProvider } from "@/lib/cart";
 import { CartLink } from "./CartLink";
 import { IconAbout, IconShop } from "./NavIcons";
 import { GlassDefs } from "./ProductImage";
+import { ProtectImages } from "./ProtectImages";
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   return (
     <CartProvider>
       <GlassDefs />
+      <ProtectImages />
       <header className="site-header">
         <Link href="/" className="logo" aria-label="hashoval, לדף הבית">hashoval</Link>
         <nav aria-label="ראשי">

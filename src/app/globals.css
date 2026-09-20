@@ -383,7 +383,6 @@ th { font-weight: 500; color: var(--muted); font-size: .78rem; letter-spacing: .
 .upload-actions button { background: none; border: 0; color: #fff; font: inherit; font-size: .75rem; padding: .1rem .3rem; cursor: pointer; text-align: start; }
 .upload-busy { display: grid; place-items: center; color: var(--muted); font-size: .85rem; }
 
-@media (hover: none) { .gallery-dots { display: none; } }
 
 /* audience picker in the product form */
 .gender-pick { border: 0; padding: 0; margin: 0; display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: center; }
@@ -911,3 +910,12 @@ tbody tr:hover { background: rgba(255, 255, 255, .04); }
 .zoom-thumbs button { width: 52px; height: 52px; padding: 0; border: 0; cursor: pointer; opacity: .55; overflow: hidden; background: #1a1c20; }
 .zoom-thumbs button.on, .zoom-thumbs button:hover { opacity: 1; box-shadow: 0 0 0 2px var(--brass); }
 .zoom-thumbs img { width: 100%; height: 100%; object-fit: cover; }
+
+/* photos cannot be dragged out, selected or long-pressed into a "save image" menu (the page also blocks the right-click menu) */
+.gallery img, .showcase-photo img, .thumbs img, .card-media img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
