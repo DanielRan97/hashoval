@@ -197,9 +197,9 @@ input[type=checkbox] { accent-color: var(--ink); width: 1.05rem; height: 1.05rem
 
 /* photos: stacked and cross-faded; square, no frame */
 .gallery { position: relative; aspect-ratio: 1; overflow: hidden; background: rgba(255, 255, 255, .45); }
-.gallery > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 7%; opacity: 0; transition: opacity .45s; } /* whole bottle visible, a little air around it */
+.gallery > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 2%; opacity: 0; transition: opacity .45s; } /* whole bottle visible, a little air around it */
 .gallery > img.on { opacity: 1; }
-.gallery > img.cutout { padding: 13%; } /* transparent background: zoomed out a bit more */
+.gallery > img.cutout { padding: 6%; } /* transparent background: zoomed out a bit more */
 .gallery-empty { position: absolute; inset: 0; display: grid; place-items: center; background: radial-gradient(120% 100% at 30% 8%, #fff, rgba(255, 255, 255, .5)); }
 .gallery-dots { position: absolute; inset-inline: 0; bottom: .6rem; display: flex; justify-content: center; gap: .3rem; pointer-events: none; }
 .gallery-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, .55); box-shadow: 0 0 0 1px rgba(20, 45, 70, .18); }
