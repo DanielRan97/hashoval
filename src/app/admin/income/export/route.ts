@@ -1,6 +1,6 @@
 import { isAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { incomeWhere, parseRange, resolvePeriod } from "@/lib/income";
+import { incomeWhere, resolvePeriod } from "@/lib/income";
 import { PAYMENT_METHOD_LABELS } from "@/lib/payments";
 
 export const dynamic = "force-dynamic";
@@ -19,19 +19,15 @@ export async function GET(req: Request) {
   if (!(await isAdmin())) return new Response("Unauthorized", { status: 401 });
   const q = new URL(req.url).searchParams;
   const period = q.get("period") ?? "month";
-  const payout = q.get("payout");
   const orders = await db.order.findMany({
     where: incomeWhere({
       paid: resolvePeriod(period, q.get("from") ?? undefined, q.get("to") ?? undefined),
       method: q.get("method") || undefined,
-      payout: payout === "done" || payout === "pending" ? payout : undefined,
-      account: q.get("account") || undefined,
-      payoutDates: parseRange(q.get("pFrom") ?? undefined, q.get("pTo") ?? undefined),
     }),
     orderBy: [{ paidAt: "desc" }, { createdAt: "desc" }],
   });
 
-  const header = ["מספר הזמנה", "תאריך תשלום", "לקוח", "אמצעי תשלום", "סכום", "משלוח", "תאריך העברה", "חשבון בנק", "מזהה עסקה"];
+  const header = ["מספר הזמנה", "תאריך תשלום", "לקוח", "אמצעי תשלום", "סכום", "משלוח", "מזהה עסקה"];
   const rows = orders.map((o) => [
     o.id,
     day(o.paidAt ?? o.createdAt),
@@ -39,8 +35,6 @@ export async function GET(req: Request) {
     o.paymentMethod ? (PAYMENT_METHOD_LABELS[o.paymentMethod] ?? o.paymentMethod) : "ידני",
     o.totalAmount,
     o.shippingCost,
-    day(o.payoutDate),
-    o.payoutAccount,
     o.providerTxnId,
   ]);
   // BOM so Excel reads the Hebrew as UTF-8.

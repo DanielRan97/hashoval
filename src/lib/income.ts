@@ -54,9 +54,6 @@ const dateClause = (r: DateRange) => (r.from || r.to ? { ...(r.from && { gte: r.
 export type IncomeFilter = {
   paid: DateRange;
   method?: string; // card | apple_pay | google_pay | manual
-  payout?: "done" | "pending";
-  account?: string;
-  payoutDates: DateRange;
 };
 
 /**
@@ -69,10 +66,5 @@ export function incomeWhere(f: IncomeFilter): Prisma.OrderWhereInput {
   if (paidRange) and.push({ OR: [{ paidAt: paidRange }, { paidAt: null, createdAt: paidRange }] });
   if (f.method === "manual") and.push({ paymentMethod: null });
   else if (f.method) and.push({ paymentMethod: f.method });
-  if (f.payout === "done") and.push({ payoutDate: { not: null } });
-  if (f.payout === "pending") and.push({ payoutDate: null });
-  if (f.account) and.push({ payoutAccount: f.account });
-  const payoutRange = dateClause(f.payoutDates);
-  if (payoutRange) and.push({ payoutDate: payoutRange });
   return { AND: and };
 }

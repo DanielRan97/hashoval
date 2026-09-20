@@ -24,7 +24,6 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         {o.paidAt && (<><dt>תשלום</dt><dd>{PAYMENT_METHOD_LABELS[o.paymentMethod ?? ""] ?? "ידני"} · {o.paidAt.toLocaleString("he-IL")}</dd></>)}
         {o.providerTxnId && (<><dt>מזהה עסקה</dt><dd dir="ltr" style={{ textAlign: "start" }}>{o.providerTxnId}</dd></>)}
         {o.refundedAt && (<><dt>הוחזר</dt><dd>{o.refundedAt.toLocaleString("he-IL")}</dd></>)}
-        {o.payoutDate && (<><dt>הועבר אליי</dt><dd>{o.payoutDate.toLocaleDateString("he-IL")}{o.payoutAccount ? ` · ${o.payoutAccount}` : ""}</dd></>)}
         {o.trackingNumber && (<><dt>מספר מעקב</dt><dd>{o.trackingNumber}</dd></>)}
         {o.rejectionReason && (<><dt>סיבת ביטול</dt><dd>{o.rejectionReason}</dd></>)}
       </dl>
