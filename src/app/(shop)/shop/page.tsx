@@ -34,8 +34,9 @@ export default async function Shop({
       (!state.inStock || p.stock !== "out") &&
       (!state.latest || newest.has(p.id)),
   );
-  // An explicit sort wins; "new on the site" alone lists the newest first; otherwise brand and name.
-  const products = state.sort ? sortProducts(filtered, state.sort) : state.latest ? sortProducts(filtered, "newest") : filtered;
+  // Newest first unless another sort is chosen.
+  const activeSort: SortKey = state.sort ?? "newest";
+  const products = sortProducts(filtered, activeSort);
 
   /** A link to this page with some of the current choices changed. */
   const href = (change: Partial<State>) => {
@@ -57,16 +58,6 @@ export default async function Shop({
           desktop = brands on the right, filters and sorting on top, products below;
           phone = filters, brands, sorting, products. */}
       <div className="shop-layout">
-        <aside className="brand-list" aria-label="מותגים">
-          <Link href={href({ brand: undefined })} className={!state.brand ? "active" : undefined} aria-current={!state.brand ? "page" : undefined}>
-            כל המותגים
-          </Link>
-          {brands.map((b) => (
-            <Link key={b} href={href({ brand: b })} className={state.brand === b ? "active" : undefined} aria-current={state.brand === b ? "page" : undefined}>
-              {b}
-            </Link>
-          ))}
-        </aside>
 
         <div className="shop-filters filters">
           <Link href={href({ gender: undefined })} className={!state.gender ? "active" : undefined}>כל הבשמים</Link>
@@ -81,7 +72,6 @@ export default async function Shop({
           </Link>
         </div>
 
-        {/* phones: the brands become a glass dropdown instead of the side list */}
         <div className="brand-select">
           <GlassSelect
             placeholder="כל המותגים"
@@ -96,12 +86,12 @@ export default async function Shop({
         <div className="shop-sort">
           <GlassSelect
             placeholder="מיון"
-            currentKey={state.sort}
+            currentKey={activeSort}
             options={SORT_KEYS.map((key) => ({
               key,
               label: SORT_LABELS[key],
-              // choosing the selected option again clears the sort
-              href: href({ sort: state.sort === key ? undefined : key }),
+              // the default (newest) needs no parameter; choosing the selected option again returns to it
+              href: href({ sort: key === "newest" || state.sort === key ? undefined : key }),
             }))}
           />
         </div>

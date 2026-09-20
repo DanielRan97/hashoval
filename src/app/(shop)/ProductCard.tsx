@@ -20,7 +20,7 @@ export function ProductCard({ p }: { p: StoreProduct }) {
           {min !== null && <span className="card-price">{single ? `₪${min}` : `החל מ-₪${min}`}</span>}
         </div>
         {/* small, in the bottom left corner */}
-        <span className={`badge sm card-stock ${p.stock}`}>{STOCK_LABELS[p.stock]}</span>
+        {p.stock !== "ok" && <span className={`badge sm card-stock ${p.stock}`}>{STOCK_LABELS[p.stock]}</span>}
       </div>
     </Link>
   );
