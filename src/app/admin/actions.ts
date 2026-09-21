@@ -105,6 +105,7 @@ export async function saveSettings(_: string | null, form: FormData) {
     data[k] = v;
   }
   if (data.spillagePercent >= 100) return "אחוז פחת חייב להיות מתחת ל-100";
+  if (data.paymentFeePercent >= 100) return "עמלת סליקה חייבת להיות מתחת ל-100";
   if (data.outOfStockThresholdMl >= data.lowStockThresholdMl) return "סף \"אזל\" חייב להיות נמוך מסף \"עומד להיגמר\"";
   await db.settings.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } });
   revalidatePath("/admin", "layout");

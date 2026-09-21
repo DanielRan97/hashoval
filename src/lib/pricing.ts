@@ -3,6 +3,8 @@ export type DecantSize = (typeof DECANT_SIZES)[number];
 
 export type PricingSettings = {
   spillagePercent: number;
+  packagingCostPerUnit: number;
+  paymentFeePercent: number;
   multiplier2ml: number;
   multiplier3ml: number;
   multiplier5ml: number;
@@ -19,10 +21,82 @@ function multiplierFor(size: DecantSize, s: PricingSettings): number {
   return size === 2 ? s.multiplier2ml : size === 3 ? s.multiplier3ml : size === 5 ? s.multiplier5ml : s.multiplier10ml;
 }
 
-/** Price of one decant, rounded to the nearest whole shekel. */
+export type SamplePriceInput = {
+  bottlePrice: number;
+  bottleVolume: number;
+  sampleSize: number;
+  multiplier: number;
+  wastagePercent: number;
+  packagingCost: number;
+  paymentFeePercent: number;
+};
+
+export type SamplePrice = {
+  /** What one ml really costs once the wastage is counted: the bottle price over the ml that can be sold. */
+  effectivePricePerMl: number;
+  /** The cost of the liquid in the sample, before any mark-up. */
+  liquidCost: number;
+  /** The liquid after the size multiplier. The packaging is not multiplied. */
+  liquidWithMultiplier: number;
+  packagingCost: number;
+  priceBeforeFees: number;
+  /** What the payment provider keeps out of the final price. */
+  paymentFee: number;
+  /** Whole shekels, always rounded up. */
+  finalPrice: number;
+  pricePerMl: number;
+};
+
+const EPS = 1e-9; // so a float that is really 52 does not round up to 53
+
+/**
+ * The one place a decant's price is worked out.
+ *
+ *   effectivePricePerMl = bottlePrice / (bottleVolume × (1 − wastage%))
+ *   priceBeforeFees     = effectivePricePerMl × sampleSize × multiplier + packagingCost
+ *   finalPrice          = ceil(priceBeforeFees / (1 − paymentFee%))
+ *
+ * The multiplier applies to the liquid only, the packaging is a fixed cost, and the payment fee is
+ * added last so that after the provider takes its share the planned price is what is left.
+ * Shipping is deliberately not part of this: it is added separately at checkout.
+ */
+export function calculateSamplePrice(i: SamplePriceInput): SamplePrice {
+  const usable = i.bottleVolume * (1 - i.wastagePercent / 100);
+  const effectivePricePerMl = usable > 0 ? i.bottlePrice / usable : 0;
+  const liquidCost = effectivePricePerMl * i.sampleSize;
+  const liquidWithMultiplier = liquidCost * i.multiplier;
+  const priceBeforeFees = liquidWithMultiplier + i.packagingCost;
+  const feeRate = Math.min(Math.max(i.paymentFeePercent, 0), 99.9) / 100;
+  const beforeRounding = priceBeforeFees / (1 - feeRate);
+  const finalPrice = Math.ceil(beforeRounding - EPS);
+  return {
+    effectivePricePerMl,
+    liquidCost,
+    liquidWithMultiplier,
+    packagingCost: i.packagingCost,
+    priceBeforeFees,
+    paymentFee: beforeRounding - priceBeforeFees,
+    finalPrice,
+    pricePerMl: i.sampleSize > 0 ? finalPrice / i.sampleSize : 0,
+  };
+}
+
+/** The full breakdown for one decant of a product, from the shop settings. */
+export function decantBreakdown(p: PricedProduct, size: DecantSize, s: PricingSettings): SamplePrice {
+  return calculateSamplePrice({
+    bottlePrice: p.marketValuePerBottle,
+    bottleVolume: p.bottleSizeMl,
+    sampleSize: size,
+    multiplier: multiplierFor(size, s),
+    wastagePercent: s.spillagePercent,
+    packagingCost: s.packagingCostPerUnit,
+    paymentFeePercent: s.paymentFeePercent,
+  });
+}
+
+/** Price of one decant, in whole shekels. */
 export function decantPrice(p: PricedProduct, size: DecantSize, s: PricingSettings): number {
-  const perMl = p.marketValuePerBottle / p.bottleSizeMl;
-  return Math.round(perMl * size * multiplierFor(size, s));
+  return decantBreakdown(p, size, s).finalPrice;
 }
 
 export function decantPrices(p: PricedProduct, s: PricingSettings): Record<DecantSize, number> {

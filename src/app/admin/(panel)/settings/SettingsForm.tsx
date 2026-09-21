@@ -1,16 +1,17 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { calculateSamplePrice } from "@/lib/pricing";
 import { saveSettings } from "../../actions";
 
 const FIELDS: { key: string; label: string; hint: string }[] = [
-  { key: "spillagePercent", label: "פחת (%)", hint: "כמה מהבושם הולך לאיבוד בכל מילוי. הוא מופחת מהכמות שאפשר למכור." },
-  { key: "multiplier2ml", label: "מקדם 2 מ״ל", hint: "מחיר דוגמית = מחיר למ״ל × הגודל × המקדם. מקדם גבוה יותר, מחיר גבוה יותר." },
+  { key: "spillagePercent", label: "פחת (%)", hint: "כמה מהבושם הולך לאיבוד בכל מילוי. הוא מופחת מהכמות שאפשר למכור, ומייקר את עלות המ״ל האפקטיבית." },
+  { key: "multiplier2ml", label: "מקדם 2 מ״ל", hint: "המקדם מוכפל בעלות הנוזל של הדוגמית (לא באריזה). מקדם גבוה יותר, מחיר גבוה יותר." },
   { key: "multiplier3ml", label: "מקדם 3 מ״ל", hint: "אותו חישוב עבור דוגמית של 3 מ״ל." },
   { key: "multiplier5ml", label: "מקדם 5 מ״ל", hint: "אותו חישוב עבור דוגמית של 5 מ״ל." },
   { key: "multiplier10ml", label: "מקדם 10 מ״ל", hint: "בדרך כלל הנמוך ביותר, כי גודל גדול יותר זול יותר למ״ל." },
-  { key: "packagingCostPerUnit", label: "עלות אריזה ליחידה (₪)", hint: "עלות הבקבוקון והאריזה של דוגמית אחת." },
-  { key: "paymentFeePercent", label: "עמלת סליקה (%)", hint: "העמלה שחברת הסליקה גובה מכל תשלום." },
+  { key: "packagingCostPerUnit", label: "עלות אריזה ליחידה (₪)", hint: "עלות קבועה לכל דוגמית (בקבוקון, אריזה). מתווספת למחיר ולא מוכפלת במקדם." },
+  { key: "paymentFeePercent", label: "עמלת סליקה (%)", hint: "העמלה שחברת הסליקה גובה. המחיר ללקוח כבר כולל אותה, כך שהעסק נשאר עם המחיר המתוכנן." },
   { key: "freeShippingThreshold", label: "משלוח חינם מעל (₪)", hint: "הזמנה בסכום הזה ומעלה מקבלת משלוח חינם." },
   { key: "standardShippingCost", label: "עלות משלוח רגיל (₪)", hint: "המחיר של משלוח בהזמנה מתחת לסף." },
   { key: "lowStockThresholdMl", label: "עומד להיגמר מתחת ל- (מ״ל נטו)", hint: "מתחת לכמות הזו הבושם מסומן \"עומד להיגמר\" ומופיע בלוח הבקרה." },
@@ -24,8 +25,7 @@ export function SettingsForm({ values }: { values: Record<string, number | strin
   const [bottlePrice, setBottlePrice] = useState("500");
   const [bottleMl, setBottleMl] = useState("100");
 
-  const perMl = Number(bottlePrice) / Number(bottleMl);
-  const valid = Number.isFinite(perMl) && perMl > 0;
+  const valid = Number(bottlePrice) > 0 && Number(bottleMl) > 0 && Number(v.spillagePercent) < 100;
 
   return (
     <div className="settings-grid">
@@ -49,22 +49,40 @@ export function SettingsForm({ values }: { values: Record<string, number | strin
           <label>נפח (מ״ל)<input type="number" min={1} value={bottleMl} onChange={(e) => setBottleMl(e.target.value)} /></label>
         </div>
         {valid ? (
-          <table>
-            <thead><tr><th>גודל</th><th>מחיר</th><th>למ״ל</th></tr></thead>
-            <tbody>
-              {SIZES.map(([size, key]) => {
-                const mult = Number(v[key]);
-                const price = Math.round(perMl * size * mult);
-                return (
-                  <tr key={size}>
-                    <td>{size} מ״ל</td>
-                    <td className="nowrap">{Number.isFinite(price) ? `₪${price}` : "—"}</td>
-                    <td className="nowrap">{Number.isFinite(price) ? `₪${Number((price / size).toFixed(1))}` : "—"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="breakdowns-list">
+            {SIZES.map(([size, key]) => {
+              const r = calculateSamplePrice({
+                bottlePrice: Number(bottlePrice),
+                bottleVolume: Number(bottleMl),
+                sampleSize: size,
+                multiplier: Number(v[key]),
+                wastagePercent: Number(v.spillagePercent),
+                packagingCost: Number(v.packagingCostPerUnit),
+                paymentFeePercent: Number(v.paymentFeePercent),
+              });
+              const ok = Number.isFinite(r.finalPrice);
+              const f = (n: number) => `₪${n.toFixed(2)}`;
+              return (
+                <div key={size} className="breakdown">
+                  <div className="breakdown-head">
+                    <strong>{size} מ״ל</strong>
+                    <span className="breakdown-final">{ok ? `₪${r.finalPrice}` : "—"}</span>
+                  </div>
+                  {ok && (
+                    <dl>
+                      <div><dt>עלות נוזל</dt><dd>{f(r.liquidCost)}</dd></div>
+                      <div><dt>נוזל אחרי מקדם</dt><dd>{f(r.liquidWithMultiplier)}</dd></div>
+                      <div><dt>אריזה</dt><dd>{f(r.packagingCost)}</dd></div>
+                      <div><dt>מחיר לפני סליקה</dt><dd>{f(r.priceBeforeFees)}</dd></div>
+                      <div><dt>עמלת סליקה</dt><dd>{f(r.paymentFee)}</dd></div>
+                      <div><dt>מחיר למ״ל</dt><dd>{f(r.pricePerMl)}</dd></div>
+                    </dl>
+                  )}
+                </div>
+              );
+            })}
+            <p className="muted breakdown-note">עלות מ״ל אפקטיבית (אחרי פחת): ₪{(Number(bottlePrice) / (Number(bottleMl) * (1 - Number(v.spillagePercent) / 100))).toFixed(2)}. המחיר הסופי מעוגל כלפי מעלה לשקל שלם. המשלוח לא כלול.</p>
+          </div>
         ) : (
           <p className="muted">הזן מחיר ונפח תקינים.</p>
         )}

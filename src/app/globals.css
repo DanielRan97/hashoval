@@ -1237,3 +1237,14 @@ tbody tr:hover { background: rgba(255, 255, 255, .04); }
   color: var(--ink) !important;
 }
 @media (max-width: 720px) { .about { padding-block: 2rem 3rem; } .about .about-pull { font-size: 1.2rem !important; } }
+
+/* admin: price breakdown per size */
+.breakdowns-list { display: grid; gap: .8rem; }
+.breakdown { padding: .8rem 1rem; border: 1px solid rgba(255, 255, 255, .08); border-radius: 14px; }
+.breakdown-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .4rem; }
+.breakdown-final { font-family: var(--font-serif), serif; font-size: 1.5rem; color: var(--brass); }
+.breakdown dl { display: grid; grid-template-columns: 1fr 1fr; gap: .15rem 1.2rem; margin: 0; font-size: .85rem; }
+.breakdown dl > div { display: flex; justify-content: space-between; gap: .5rem; }
+.breakdown dt { color: var(--muted); }
+.breakdown dd { margin: 0; }
+.breakdown-note { margin: .2rem 0 0; font-size: .82rem; }

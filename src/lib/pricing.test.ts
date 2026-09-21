@@ -1,18 +1,51 @@
 import { describe, expect, it } from "vitest";
-import { decantPrices, sellableMl, hasStockFor, fillPercentAfterSale, shippingFor } from "./pricing";
+import { calculateSamplePrice, decantPrices, sellableMl, hasStockFor, fillPercentAfterSale, shippingFor } from "./pricing";
 
-const s = { spillagePercent: 5, multiplier2ml: 1.75, multiplier3ml: 1.6, multiplier5ml: 1.45, multiplier10ml: 1.25 };
+const s = { spillagePercent: 5, packagingCostPerUnit: 3, paymentFeePercent: 2.5, multiplier2ml: 1.75, multiplier3ml: 1.6, multiplier5ml: 1.45, multiplier10ml: 1.25 };
 // 1000 ₪ / 100 ml = 10 ₪ per ml
 const p = { bottleSizeMl: 100, currentFillPercent: 100, marketValuePerBottle: 1000 };
 
 describe("pricing", () => {
-  it("prices decants from per-ml base and multipliers", () => {
-    // 10*2*1.75=35, 10*3*1.6=48, 10*5*1.45=72.5->73 (round), 10*10*1.25=125
-    expect(decantPrices(p, s)).toEqual({ 2: 35, 3: 48, 5: 73, 10: 125 });
+  it("prices decants with wastage, packaging and the payment fee", () => {
+    // 1000 for 100 ml, 5% wastage: 10.526/ml. 2 ml: 21.05*1.75 + 3 = 39.84, /0.975 = 40.86 -> 41
+    expect(decantPrices(p, s)).toEqual({ 2: 41, 3: 55, 5: 82, 10: 139 });
   });
   it("uses odd bottle sizes", () => {
-    const q = { bottleSizeMl: 75, currentFillPercent: 100, marketValuePerBottle: 1500 }; // 20/ml
-    expect(decantPrices(q, s)[2]).toBe(70);
+    const q = { bottleSizeMl: 75, currentFillPercent: 100, marketValuePerBottle: 1500 };
+    expect(decantPrices(q, s)[2]).toBe(79);
+  });
+});
+
+describe("calculateSamplePrice", () => {
+  const aventus = { bottlePrice: 1100, bottleVolume: 100, sampleSize: 2, multiplier: 1.75, wastagePercent: 5, packagingCost: 3, paymentFeePercent: 2.5 };
+  it("works the Creed Aventus example step by step", () => {
+    const r = calculateSamplePrice(aventus);
+    expect(r.effectivePricePerMl).toBeCloseTo(11.5789, 4);
+    expect(r.liquidCost).toBeCloseTo(23.1579, 4);
+    expect(r.liquidWithMultiplier).toBeCloseTo(40.5263, 4);
+    expect(r.priceBeforeFees).toBeCloseTo(43.5263, 4);
+    expect(r.paymentFee).toBeCloseTo(1.1160, 3);
+    expect(r.finalPrice).toBe(45);
+    expect(r.pricePerMl).toBeCloseTo(22.5, 5);
+  });
+  it("multiplies the liquid only, not the packaging", () => {
+    const zero = calculateSamplePrice({ ...aventus, wastagePercent: 0, paymentFeePercent: 0, packagingCost: 0, multiplier: 2 });
+    const withPack = calculateSamplePrice({ ...aventus, wastagePercent: 0, paymentFeePercent: 0, packagingCost: 3, multiplier: 2 });
+    expect(withPack.priceBeforeFees - zero.priceBeforeFees).toBeCloseTo(3, 9);
+  });
+  it("leaves the planned price after the provider's cut", () => {
+    const r = calculateSamplePrice(aventus);
+    expect(r.finalPrice * (1 - 0.025)).toBeGreaterThanOrEqual(r.priceBeforeFees);
+  });
+  it("always rounds up to a whole shekel, but an exact price stays as it is", () => {
+    const base = { bottleVolume: 100, sampleSize: 2, multiplier: 1, wastagePercent: 0, packagingCost: 0, paymentFeePercent: 0 };
+    expect(calculateSamplePrice({ ...base, bottlePrice: 2400 }).finalPrice).toBe(48); // exactly 48
+    expect(calculateSamplePrice({ ...base, bottlePrice: 2406 }).finalPrice).toBe(49); // 48.12
+    expect(calculateSamplePrice({ ...base, bottlePrice: 2600.5 }).finalPrice).toBe(53); // 52.01
+  });
+  it("does not blow up on nonsense", () => {
+    expect(calculateSamplePrice({ ...aventus, bottleVolume: 0 }).finalPrice).toBe(Math.ceil(3 / 0.975));
+    expect(Number.isFinite(calculateSamplePrice({ ...aventus, paymentFeePercent: 100 }).finalPrice)).toBe(true);
   });
 });
 
