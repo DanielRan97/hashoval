@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { incomeWhere, PERIOD_LABELS, resolvePeriod, type IncomeFilter } from "@/lib/income";
 import { PAYMENT_METHOD_LABELS } from "@/lib/payments";
+import { bucketIncome, IncomeChart } from "./IncomeChart";
 import { IncomeTable, type IncomeRow } from "./IncomeTable";
 
 export const dynamic = "force-dynamic";
@@ -102,6 +103,8 @@ export default async function IncomePage({ searchParams }: { searchParams: Promi
           )}
         </div>
       </div>
+
+      <IncomeChart points={bucketIncome(orders.map((o) => ({ date: o.paidAt ?? o.createdAt, amount: o.totalAmount })))} />
 
       <h2>תשלומים</h2>
       <p>

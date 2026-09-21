@@ -81,3 +81,15 @@ export async function ensureRecentBackup(now = Date.now()) {
   if (last && now - (await stat(path.join(BACKUP_DIR, last))).mtimeMs < DAY_MS) return null;
   return (await createBackup()).file;
 }
+
+/** When the newest database snapshot was written, or null if there is none. */
+export async function latestBackupTime(): Promise<Date | null> {
+  const files = await snapshots();
+  const last = files[files.length - 1];
+  if (!last) return null;
+  try {
+    return (await stat(path.join(BACKUP_DIR, last))).mtime;
+  } catch {
+    return null;
+  }
+}

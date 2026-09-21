@@ -3,6 +3,7 @@ import { deleteProduct } from "../../actions";
 import { DeleteButton } from "../DeleteButton";
 import { FeaturedToggle } from "./FeaturedToggle";
 import { ImageZoom } from "./ImageZoom";
+import { MoreColumns } from "./MoreColumns";
 import { db, getSettings } from "@/lib/db";
 import { availableMl, decantPrices, sellableMl } from "@/lib/pricing";
 import { GENDER_LABELS, isGender } from "@/lib/gender";
@@ -53,11 +54,11 @@ export default async function ProductsPage({
       {products.length === 0 ? (
         <p className="muted">לא נמצאו מוצרים.</p>
       ) : (
-        <div className="table-scroll"><table>
+        <MoreColumns><div className="table-scroll"><table>
           <thead>
             <tr>
-              <th></th><th>מותג</th><th>שם</th><th>מיועד ל</th><th>מ״ל זמינים</th><th>ערך שוק</th>
-              <th>מחיר 2/3/5/10 מ״ל</th><th>הוזמן (יח׳)</th><th>צפיות</th><th>תאריך העלאה</th><th>מומלץ</th><th>סטטוס</th><th></th>
+              <th></th><th>מותג</th><th>שם</th><th>מיועד ל</th><th>מ״ל זמינים</th><th className="extra">ערך שוק</th>
+              <th>מחיר 2/3/5/10 מ״ל</th><th className="extra">הוזמן (יח׳)</th><th className="extra">צפיות</th><th className="extra">תאריך העלאה</th><th>מומלץ</th><th>סטטוס</th><th></th>
             </tr>
           </thead>
           <tbody>
@@ -75,11 +76,11 @@ export default async function ProductsPage({
                     <span className="muted"> (נטו {net.toFixed(1)})</span>{" "}
                     <span className={`badge ${level}`}>{STOCK_LABELS[level]}</span>
                   </td>
-                  <td>₪{p.marketValuePerBottle}</td>
+                  <td className="extra">₪{p.marketValuePerBottle}</td>
                   <td className="nowrap">₪{prices[2]} / ₪{prices[3]} / ₪{prices[5]} / ₪{prices[10]}</td>
-                  <td>{orderedById.get(p.id) ?? 0}</td>
-                  <td>{p.views}</td>
-                  <td>{p.createdAt.toLocaleDateString("he-IL")}</td>
+                  <td className="extra">{orderedById.get(p.id) ?? 0}</td>
+                  <td className="extra">{p.views}</td>
+                  <td className="extra">{p.createdAt.toLocaleDateString("he-IL")}</td>
                   <td><FeaturedToggle id={p.id} featured={p.isFeatured} /></td>
                   <td>{p.isActive ? "פעיל" : "לא פעיל"}</td>
                   <td><div className="row-actions">
@@ -94,7 +95,7 @@ export default async function ProductsPage({
               );
             })}
           </tbody>
-        </table></div>
+        </table></div></MoreColumns>
       )}
     </>
   );

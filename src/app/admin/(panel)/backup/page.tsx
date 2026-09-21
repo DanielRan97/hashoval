@@ -1,9 +1,21 @@
+import { latestBackupTime } from "@/lib/backup";
+
 export const dynamic = "force-dynamic";
 
-export default function BackupPage() {
+export default async function BackupPage() {
+  const last = await latestBackupTime();
+  const hours = last ? (Date.now() - last.getTime()) / 3_600_000 : null;
+  // the server saves one every night, so anything older than a day and a bit is worth a look
+  const ok = hours !== null && hours <= 26;
   return (
     <>
       <h1>גיבוי</h1>
+      <p className={ok ? "backup-status ok" : "backup-status late"} role="status">
+        <span className="backup-dot" aria-hidden="true" />
+        {last
+          ? `גיבוי אוטומטי אחרון: ${last.toLocaleDateString("he-IL")} ${last.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}${ok ? "" : " (לפני יותר מיום, כדאי לבדוק)"}`
+          : "עוד לא נוצר גיבוי אוטומטי בשרת"}
+      </p>
       <p>
         הגיבוי כולל את כל הנתונים: בשמים ומלאי, הזמנות, פרטי לקוחות, חברות והגדרות. הוא לא כולל את תמונות
         המוצרים, שנשמרות בנפרד.
