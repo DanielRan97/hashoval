@@ -53,7 +53,6 @@ export function WishlistForm() {
       {state?.ok && !error && value === "" && (
         <div className="wish-thanks" role="status">
           <strong>קיבלנו את הבקשה שלכם 💛</strong>
-          <span>תודה שעזרתם לנו לבחור מה להביא בהמשך.</span>
         </div>
       )}
     </form>

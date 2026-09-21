@@ -60,17 +60,12 @@ export default async function Shop({
   return (
     <div className="container shop-wide">
       <h1 className="sr-only">חנות</h1>
-      <ShopSearch items={searchEntries} />
       {/* Every part is a direct child of the layout grid, so the order can differ by screen:
-          desktop = brands on the right, filters and sorting on top, products below;
-          phone = filters, brands, sorting, products. */}
+          desktop = one row of brands, audience, search and sorting, then the two switches, then products;
+          phone = brands, audience, sorting, the switches, search, products. */}
       <div className="shop-layout">
 
         <div className="shop-filters filters">
-          <Link href={href({ gender: undefined })} className={!state.gender ? "active" : undefined}>כל הבשמים</Link>
-          {GENDERS.map((g) => (
-            <Link key={g} href={href({ gender: g })} className={state.gender === g ? "active" : undefined}>{GENDER_LABELS[g]}</Link>
-          ))}
           <Link href={href({ inStock: !state.inStock })} className={state.inStock ? "active" : undefined} aria-pressed={state.inStock}>
             {state.inStock ? "✓ " : ""}הצג רק מוצרים במלאי
           </Link>
@@ -88,6 +83,22 @@ export default async function Shop({
               ...brands.map((b) => ({ key: b, label: b, href: href({ brand: b }) })),
             ]}
           />
+        </div>
+
+        <div className="gender-select">
+          <GlassSelect
+            placeholder="כל הבשמים"
+            currentKey={state.gender ?? ""}
+            options={[
+              { key: "", label: "כל הבשמים", href: href({ gender: undefined }) },
+              ...GENDERS.map((g) => ({ key: g, label: GENDER_LABELS[g], href: href({ gender: g }) })),
+            ]}
+          />
+        </div>
+
+        {/* finds perfumes that are already in the shop; it has nothing to do with any other page */}
+        <div className="shop-search-cell">
+          <ShopSearch items={searchEntries} />
         </div>
 
         <div className="shop-sort">

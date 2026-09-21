@@ -1319,3 +1319,27 @@ tbody tr:hover { background: rgba(255, 255, 255, .04); }
   .site-header nav { gap: 0; }
   .nav-icon svg { width: 1.35rem; height: 1.35rem; }
 }
+
+/* ---------- shop controls: one row of selects and search ---------- */
+.shop-layout {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "brandsel gendersel search sort"
+    "filters filters filters filters"
+    "products products products products";
+  column-gap: .9rem;
+  row-gap: 1rem;
+  align-items: center;
+}
+.gender-select { grid-area: gendersel; }
+.shop-search-cell { grid-area: search; min-width: 0; }
+.shop-search-cell .shop-search { margin: 0; max-width: none; }
+.shop-filters { margin: 0; }
+@media (max-width: 720px) {
+  .shop-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "brandsel" "gendersel" "sort" "filters" "search" "products";
+    row-gap: .85rem;
+  }
+  .gender-select .glass-select-btn { width: 100%; }
+}
