@@ -2,8 +2,10 @@ import Link from "next/link";
 import { getStoreProducts, minPrice, type StoreProduct } from "@/lib/catalog";
 import { getSettings } from "@/lib/db";
 import { Favorite } from "./Favorite";
+import { HScroll } from "./HScroll";
 import { ProductCard } from "./ProductCard";
 import { Showcase, type ShowcaseItem } from "./Showcase";
+import { Trust } from "./Trust";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +35,7 @@ function favoriteOf(all: StoreProduct[]) {
 /** Home: a strip of ten random perfumes that are in stock, then the perfumes marked as recommended in the admin. */
 export default async function Home() {
   const [all, s] = await Promise.all([getStoreProducts(), getSettings()]);
-  const featured = all.filter((p) => p.isFeatured);
+  const featured = all.filter((p) => p.isFeatured).slice(0, 3); // three, so it feels chosen rather than a catalogue
   const favorite = favoriteOf(all);
   const mostViewed = all.filter((p) => p.stock !== "out" && p.views > 0).sort((a, b) => b.views - a.views).slice(0, 8);
   const showable: ShowcaseItem[] = all
@@ -50,11 +52,8 @@ export default async function Home() {
     });
   return (
     <>
-      <h1 className="sr-only">hashoval</h1>
+      <h1 className="tagline">גלו יותר. התחייבו לפחות.</h1>
       {showable.length > 0 && <Showcase all={showable} initial={shuffle(showable).slice(0, 10)} />}
-      <p className="intro-line">
-        דוגמיות מקוריות · 2, 3, 5 או 10 מ״ל · משלוח חינם מעל ₪{s.freeShippingThreshold}
-      </p>
       <section className="container recs">
         {featured.length > 0 && (
           <>
@@ -66,7 +65,9 @@ export default async function Home() {
         {mostViewed.length > 0 && (
           <>
             <h2 className="recs-title">הנצפים ביותר</h2>
-            <div className="grid grid-4">{mostViewed.map((p) => <ProductCard key={p.id} p={p} />)}</div>
+            <HScroll label="הנצפים ביותר">
+              {mostViewed.map((p) => <div key={p.id} className="hscroll-item"><ProductCard p={p} /></div>)}
+            </HScroll>
           </>
         )}
         {all.length === 0 && <p className="muted">הבשמים יתווספו בקרוב.</p>}
@@ -74,6 +75,7 @@ export default async function Home() {
           <p className="all-link"><Link href="/shop" className="btn ghost">לכל הבשמים</Link></p>
         )}
       </section>
+      {all.length > 0 && <Trust freeShippingFrom={s.freeShippingThreshold} />}
     </>
   );
 }

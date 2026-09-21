@@ -105,7 +105,6 @@ p { margin-block: 0 1rem; }
 .nav strong { font-family: var(--font-serif), serif; letter-spacing: .18em; font-weight: 400; padding-inline: .5rem; }
 .nav .grow { flex: 1; }
 main { display: block; }
-.intro-line { text-align: center; color: var(--muted); font-size: .9rem; letter-spacing: .05em; margin: 0; padding: 1.5rem 1rem 0; }
 .all-link { text-align: center; margin-top: 2.5rem; }
 
 .site-footer { text-align: center; color: var(--muted); padding: 3.5rem 1rem 2.5rem; font-size: .85rem; }
@@ -357,7 +356,6 @@ th { font-weight: 500; color: var(--muted); font-size: .78rem; letter-spacing: .
 @media (max-width: 720px) {
   .logo { font-size: 1.05rem; letter-spacing: .14em; padding-inline: .25rem; }
   .site-header a { padding: .3rem .45rem; font-size: .92rem; }
-  .intro-line { font-size: .82rem; }
 }
 
 
@@ -818,7 +816,6 @@ select option { background: #15171a; color: var(--ink); }
 tbody tr:hover { background: rgba(255, 255, 255, .04); }
 .row-error { background: rgba(30, 20, 20, .95); }
 .recs-title { font-weight: 300; letter-spacing: .12em; }
-.intro-line { letter-spacing: .12em; }
 
 /* fallbacks: keep the dark surfaces readable when transparency is reduced or unsupported */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -970,3 +967,119 @@ tbody tr:hover { background: rgba(255, 255, 255, .04); }
 .site-header .logo { padding: 0; }
 .site-header .logo img { display: block; height: 50px; width: auto; }
 @media (max-width: 720px) { .site-header .logo img { height: 38px; } }
+
+/* ---------- refinement: a larger logo, quieter controls, roomier cards, gold only where it matters ---------- */
+.site-header .logo img { height: 62px; }
+@media (max-width: 720px) { .site-header .logo img { height: 46px; } }
+:root { --muted: #b1aa9c; }
+
+/* controls: hairline borders, no inner glow, light type, so they sit quietly next to the logo */
+.site-header, .nav {
+  border-color: rgba(255, 255, 255, .07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 20px 36px -24px rgba(0, 0, 0, .75);
+}
+.filters a, .glass-select-btn, .btn.ghost, .size, .back-btn, .thumbs button {
+  border-color: rgba(255, 255, 255, .08);
+  background: rgba(255, 255, 255, .03);
+  box-shadow: none;
+  font-weight: 300;
+}
+.filters a:hover, .glass-select-btn:hover, .btn.ghost:hover, .size:hover, .back-btn:hover { background: rgba(255, 255, 255, .07); }
+.filters a.active, .size.active { font-weight: 400; }
+.site-header a.nav-icon, .nav-icon::after { font-weight: 300; }
+.nav-icon svg { stroke-width: 1.3; }
+.recs-title::after { background: rgba(255, 255, 255, .28); height: 1px; }
+
+/* product cards: brand and name, then the price and stock on one line pinned to the bottom */
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  padding: 1.15rem 1.3rem 1.25rem;
+  min-height: 0;
+}
+.card-brand { color: #c7c0b2; font-size: .76rem; letter-spacing: .16em; }
+.card-name { min-height: 0; font-size: 1.25rem; line-height: 1.35; }
+.card-foot { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: auto; padding-top: .7rem; }
+.card-price { font-family: var(--font-serif), serif; font-size: 1.3rem; color: var(--brass); letter-spacing: .01em; }
+.card-stock { position: static; margin: 0; align-self: center; }
+.badge.card-stock.ok { color: var(--muted); border-color: rgba(255, 255, 255, .1); background: none; }
+@media (max-width: 720px) {
+  .card-info { min-height: 0; padding: .95rem 1rem 1.05rem; }
+  .card-name { font-size: 1.08rem; }
+  .card-price { font-size: 1.15rem; }
+  .card-foot { flex-wrap: wrap; row-gap: .35rem; }
+}
+
+/* long brand names must never widen a card (phones: two equal columns) */
+.card, .card-info, .card-brand { min-width: 0; }
+@media (max-width: 720px) { .grid, .recs .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---------- home polish: a line of personality, air around the strip, a sliding row, three promises ---------- */
+.tagline {
+  margin: 1.6rem 1rem .2rem;
+  text-align: center;
+  font-family: var(--font-serif), serif;
+  font-size: clamp(1.25rem, 2.6vw, 1.75rem);
+  font-weight: 300;
+  letter-spacing: .06em;
+  color: var(--ink);
+}
+.showcase { margin-inline: clamp(.75rem, 5vw, 5.5rem); }
+@media (max-width: 720px) { .showcase { margin-inline: 0; } .tagline { margin-top: 1.1rem; } }
+
+.favorite-eyebrow { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
+.favorite-basis { color: var(--muted); font-size: .8rem; letter-spacing: .04em; }
+
+.hscroll { position: relative; }
+.hscroll-row {
+  display: flex;
+  gap: 1.4rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-block: .3rem 1rem;
+}
+.hscroll-row::-webkit-scrollbar { display: none; }
+.hscroll-item { flex: 0 0 calc((100% - 3 * 1.4rem) / 4); min-width: 0; scroll-snap-align: start; display: flex; }
+.hscroll-item > .card { width: 100%; }
+@media (max-width: 900px) { .hscroll-item { flex-basis: calc((100% - 1.4rem) / 2); } }
+@media (max-width: 720px) { .hscroll-row { gap: .8rem; } .hscroll-item { flex-basis: 62%; } }
+.hscroll-arrow {
+  position: absolute;
+  top: 38%;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0;
+  color: var(--ink);
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 50%;
+  background: rgba(14, 15, 18, .78);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: background .2s;
+}
+.hscroll-arrow:hover { background: rgba(40, 42, 48, .9); }
+.hscroll-arrow svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.hscroll-arrow.prev { inset-inline-start: -1.1rem; }
+.hscroll-arrow.next { inset-inline-end: -1.1rem; }
+@media (hover: none), (max-width: 720px) { .hscroll-arrow { display: none; } }
+
+.trust {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 3vw, 2.5rem);
+  max-width: 1120px;
+  margin: 3.5rem auto 1rem;
+  padding: 2.2rem 1.5rem;
+  border-block: 1px solid rgba(255, 255, 255, .08);
+  text-align: center;
+}
+.trust-item { display: grid; justify-items: center; gap: .35rem; }
+.trust-item svg { width: 1.9rem; height: 1.9rem; color: var(--brass); margin-bottom: .3rem; }
+.trust-item strong { font-weight: 400; font-size: 1.02rem; letter-spacing: .02em; }
+.trust-item span { color: var(--muted); font-size: .88rem; max-width: 17rem; }
+@media (max-width: 720px) { .trust { grid-template-columns: 1fr; gap: 1.6rem; margin-top: 2.5rem; } }

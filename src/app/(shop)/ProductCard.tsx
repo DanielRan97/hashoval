@@ -16,11 +16,10 @@ export function ProductCard({ p }: { p: StoreProduct }) {
       <div className="card-info">
         <div className="card-brand">{p.brand} · {GENDER_LABELS[p.gender]}</div>
         <div className="card-name">{p.name}</div>
-        <div className="card-meta">
-          {min !== null && <span className="card-price">{single ? `₪${min}` : `החל מ-₪${min}`}</span>}
+        <div className="card-foot">
+          {min !== null ? <span className="card-price">{single ? `₪${min}` : `החל מ-₪${min}`}</span> : <span />}
+          <span className={`badge sm card-stock ${p.stock}`}>{STOCK_LABELS[p.stock]}</span>
         </div>
-        {/* small, in the bottom left corner */}
-        <span className={`badge sm card-stock ${p.stock}`}>{STOCK_LABELS[p.stock]}</span>
       </div>
     </Link>
   );
