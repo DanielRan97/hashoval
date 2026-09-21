@@ -9,7 +9,7 @@ import { useEffect } from "react";
  */
 export function ProtectImages() {
   useEffect(() => {
-    const onPhoto = (e: Event) => e.target instanceof Element && !!e.target.closest(".gallery, .showcase-photo, .thumbs, .card-media");
+    const onPhoto = (e: Event) => e.target instanceof Element && !!e.target.closest(".gallery, .showcase-photo, .thumbs, .card-media, .shop-search-thumb");
     const block = (e: Event) => {
       if (onPhoto(e) || (e.target instanceof HTMLImageElement && e.type === "dragstart")) e.preventDefault();
     };

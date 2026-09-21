@@ -6,6 +6,7 @@ import { HScroll } from "./HScroll";
 import { ProductCard } from "./ProductCard";
 import { Showcase, type ShowcaseItem } from "./Showcase";
 import { Trust } from "./Trust";
+import { WishlistCta } from "./WishlistCta";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +54,7 @@ export default async function Home() {
   return (
     <>
       <h1 className="tagline">גלו יותר. התחייבו לפחות.</h1>
-      {showable.length > 0 && <Showcase all={showable} initial={shuffle(showable).slice(0, 10)} />}
+      {showable.length > 0 && <Showcase items={shuffle(showable).slice(0, 10)} />}
       <section className="container recs">
         {featured.length > 0 && (
           <>
@@ -75,6 +76,7 @@ export default async function Home() {
           <p className="all-link"><Link href="/shop" className="btn ghost">לכל הבשמים</Link></p>
         )}
       </section>
+      <WishlistCta />
       {all.length > 0 && <Trust freeShippingFrom={s.freeShippingThreshold} />}
     </>
   );

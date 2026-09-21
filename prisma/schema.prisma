@@ -121,3 +121,12 @@ model RateLimitHit {
 
   @@index([key, createdAt])
 }
+
+// A customer's free-text wish for a perfume to add to the shop. Kept exactly as typed (only trimmed). No account, no IP.
+model WishlistRequest {
+  id            Int      @id @default(autoincrement())
+  fragranceName String
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
+}

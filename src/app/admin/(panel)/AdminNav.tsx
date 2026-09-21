@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/admin/vials", label: "בקבוקונים" },
   { href: "/admin/income", label: "הכנסות" },
   { href: "/admin/brands", label: "חברות" },
+  { href: "/admin/wishlist", label: "Wishlist" },
   { href: "/admin/settings", label: "הגדרות" },
   { href: "/admin/backup", label: "גיבוי" },
 ] as const;

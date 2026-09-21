@@ -33,3 +33,13 @@ export function IconBag() {
     </svg>
   );
 }
+
+/** A heart with a small spark: the wish list. */
+export function IconWish() {
+  return (
+    <svg {...base}>
+      <path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z" />
+      <path d="M18.5 3v3.4M16.8 4.7h3.4" />
+    </svg>
+  );
+}

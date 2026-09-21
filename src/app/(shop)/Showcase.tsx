@@ -1,39 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { PhotoData } from "@/lib/photoFx";
 import { Photo } from "./Gallery";
 
 export type ShowcaseItem = { id: number; brand: string; name: string; image: PhotoData; price: string };
 
-const SHOWN = 10;
 const SPEED = 42; // pixels per second: slow enough to read, quick enough to feel alive
-
-function pick(all: ShowcaseItem[], avoid: number[]) {
-  const fresh = all.filter((p) => !avoid.includes(p.id));
-  const pool = fresh.length >= SHOWN ? fresh : all;
-  const a = [...pool];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a.slice(0, SHOWN);
-}
 
 /**
  * The home page showcase: an endless, slowly gliding strip of perfumes. Moving the mouse onto one
  * stops the motion, turns the others black and white and enlarges that one a little. It can be dragged
- * or swiped, and a button stops it (and shows another ten). The motion is driven from script so it
- * runs the same on every browser, including iPhones; it deliberately ignores "reduce motion" like the
- * earlier carousel did, and the pause button is there for anyone who wants it still.
+ * or swiped. The motion is driven from script so it runs the same on every browser, including
+ * iPhones; it deliberately ignores "reduce motion" like the earlier carousel did.
  */
-export function Showcase({ all, initial }: { all: ShowcaseItem[]; initial: ShowcaseItem[] }) {
-  const [items, setItems] = useState(initial);
-  const [isPaused, setIsPaused] = useState(false);
+export function Showcase({ items }: { items: ShowcaseItem[] }) {
   const view = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
-  const paused = useRef(false);
   const hover = useRef(false);
   const drag = useRef({ active: false, moved: false, startX: 0, startOffset: 0 });
   const offset = useRef(0);
@@ -57,7 +41,7 @@ export function Showcase({ all, initial }: { all: ShowcaseItem[]; initial: Showc
       frame = requestAnimationFrame(step);
       const dt = Math.min(64, now - (last || now)); // a long gap (tab in the background) must not make it jump
       last = now;
-      if (paused.current || hover.current || drag.current.active) return;
+      if (hover.current || drag.current.active) return;
       offset.current += (SPEED * dt) / 1000;
       apply();
     };
@@ -133,24 +117,6 @@ export function Showcase({ all, initial }: { all: ShowcaseItem[]; initial: Showc
             )),
           )}
         </div>
-      </div>
-      <div className="showcase-tools">
-        <button
-          type="button"
-          className="showcase-btn"
-          aria-pressed={isPaused}
-          onClick={() => {
-            paused.current = !paused.current;
-            setIsPaused(paused.current);
-          }}
-        >
-          {isPaused ? "▶ המשך" : "❚❚ עצור"}
-        </button>
-        {all.length > SHOWN && (
-          <button type="button" className="showcase-btn" onClick={() => setItems(pick(all, items.map((p) => p.id)))}>
-            עוד {SHOWN} אחרים
-          </button>
-        )}
       </div>
     </div>
   );

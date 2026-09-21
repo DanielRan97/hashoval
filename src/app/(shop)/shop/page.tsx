@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { getStoreProducts, latestIds } from "@/lib/catalog";
+import { getStoreProducts, latestIds, minPrice } from "@/lib/catalog";
 import { GENDERS, GENDER_LABELS, isGender } from "@/lib/gender";
 import { isSortKey, SORT_KEYS, SORT_LABELS, sortProducts, type SortKey } from "@/lib/sort";
 import { ProductCard } from "../ProductCard";
 import { GlassSelect } from "./GlassSelect";
+import { ShopSearch, type SearchEntry } from "./ShopSearch";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,11 @@ export default async function Shop({
 
   const all = await getStoreProducts();
   const brands = [...new Set(all.map((p) => p.brand))].sort();
+  // what the search box can find: every product in the shop, with its price from the existing pricing
+  const searchEntries: SearchEntry[] = all.map((p) => {
+    const min = minPrice(p.options);
+    return { id: p.id, brand: p.brand, name: p.name, image: p.images[0]?.url ?? null, price: min === null ? "" : p.options.length === 1 ? `₪${min}` : `החל מ-₪${min}` };
+  });
   const newest = latestIds(all);
   const filtered = all.filter(
     (p) =>
@@ -54,6 +60,7 @@ export default async function Shop({
   return (
     <div className="container shop-wide">
       <h1 className="sr-only">חנות</h1>
+      <ShopSearch items={searchEntries} />
       {/* Every part is a direct child of the layout grid, so the order can differ by screen:
           desktop = brands on the right, filters and sorting on top, products below;
           phone = filters, brands, sorting, products. */}

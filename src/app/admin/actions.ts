@@ -235,3 +235,11 @@ export async function saveImageFx(imageId: number, zoom: number, x: number, y: n
   revalidatePath(`/product/${img.productId}`);
   return null;
 }
+
+/** Deletes one wishlist request. Admin only; the button asks for confirmation first. */
+export async function deleteWishlistRequest(id: number): Promise<string | null> {
+  await requireAdmin();
+  await db.wishlistRequest.deleteMany({ where: { id } });
+  revalidatePath("/admin/wishlist");
+  return null;
+}
