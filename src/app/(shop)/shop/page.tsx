@@ -40,8 +40,9 @@ export default async function Shop({
       (!state.inStock || p.stock !== "out") &&
       (!state.latest || newest.has(p.id)),
   );
-  // Newest first unless another sort is chosen.
-  const activeSort: SortKey = state.sort ?? "newest";
+  // Most viewed first unless another sort is chosen; with "new on the site" on, newest first.
+  const defaultSort: SortKey = state.latest ? "newest" : "popular";
+  const activeSort: SortKey = state.sort ?? defaultSort;
   const products = sortProducts(filtered, activeSort);
 
   /** A link to this page with some of the current choices changed. */
@@ -108,8 +109,8 @@ export default async function Shop({
             options={SORT_KEYS.map((key) => ({
               key,
               label: SORT_LABELS[key],
-              // the default (newest) needs no parameter; choosing the selected option again returns to it
-              href: href({ sort: key === "newest" || state.sort === key ? undefined : key }),
+              // the default needs no parameter; choosing the selected option again returns to it
+              href: href({ sort: key === defaultSort || state.sort === key ? undefined : key }),
             }))}
           />
         </div>
