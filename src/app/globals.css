@@ -1343,3 +1343,14 @@ tbody tr:hover { background: rgba(255, 255, 255, .04); }
   }
   .gender-select .glass-select-btn { width: 100%; }
 }
+
+/* the two switches ("in stock only", "new") come first, above the selects and search, on every screen */
+.shop-layout {
+  grid-template-areas:
+    "filters filters filters filters"
+    "brandsel gendersel search sort"
+    "products products products products";
+}
+@media (max-width: 720px) {
+  .shop-layout { grid-template-areas: "filters" "brandsel" "gendersel" "sort" "search" "products"; }
+}
