@@ -1220,3 +1220,20 @@ tbody tr:hover { background: rgba(255, 255, 255, .04); }
   .kpis .stat { padding: .8rem 1rem; }
   .kpis .num { font-size: 1.5rem; }
 }
+
+/* ---------- about: a comfortable reading column ---------- */
+.about { max-width: 600px; padding-block: 3rem 4rem; text-align: start; }
+.about h1 { margin-bottom: .4rem; }
+.about .about-lead { margin: 0 0 2.4rem; color: var(--brass); font-family: var(--font-serif), serif; font-size: 1.25rem; letter-spacing: .04em; }
+.about p { font-size: 1.08rem; line-height: 2; color: #d8d2c6; }
+.about .about-pull {
+  margin: 2.2rem 0;
+  padding-inline-start: 1.3rem;
+  border-inline-start: 1px solid rgba(210, 173, 106, .55);
+  font-family: var(--font-serif), serif;
+  font-size: 1.4rem !important;
+  font-weight: 300;
+  line-height: 1.75 !important;
+  color: var(--ink) !important;
+}
+@media (max-width: 720px) { .about { padding-block: 2rem 3rem; } .about .about-pull { font-size: 1.2rem !important; } }
