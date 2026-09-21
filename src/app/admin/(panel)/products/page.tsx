@@ -57,7 +57,7 @@ export default async function ProductsPage({
           <thead>
             <tr>
               <th></th><th>מותג</th><th>שם</th><th>מיועד ל</th><th>מ״ל זמינים</th><th>ערך שוק</th>
-              <th>מחיר 2/5/10 מ״ל</th><th>הוזמן (יח׳)</th><th>צפיות</th><th>תאריך העלאה</th><th>מומלץ</th><th>סטטוס</th><th></th>
+              <th>מחיר 2/3/5/10 מ״ל</th><th>הוזמן (יח׳)</th><th>צפיות</th><th>תאריך העלאה</th><th>מומלץ</th><th>סטטוס</th><th></th>
             </tr>
           </thead>
           <tbody>
@@ -76,7 +76,7 @@ export default async function ProductsPage({
                     <span className={`badge ${level}`}>{STOCK_LABELS[level]}</span>
                   </td>
                   <td>₪{p.marketValuePerBottle}</td>
-                  <td className="nowrap">₪{prices[2]} / ₪{prices[5]} / ₪{prices[10]}</td>
+                  <td className="nowrap">₪{prices[2]} / ₪{prices[3]} / ₪{prices[5]} / ₪{prices[10]}</td>
                   <td>{orderedById.get(p.id) ?? 0}</td>
                   <td>{p.views}</td>
                   <td>{p.createdAt.toLocaleDateString("he-IL")}</td>

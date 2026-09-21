@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { decantPrices, sellableMl, hasStockFor, fillPercentAfterSale, shippingFor } from "./pricing";
 
-const s = { spillagePercent: 5, multiplier2ml: 1.75, multiplier5ml: 1.45, multiplier10ml: 1.25 };
+const s = { spillagePercent: 5, multiplier2ml: 1.75, multiplier3ml: 1.6, multiplier5ml: 1.45, multiplier10ml: 1.25 };
 // 1000 ₪ / 100 ml = 10 ₪ per ml
 const p = { bottleSizeMl: 100, currentFillPercent: 100, marketValuePerBottle: 1000 };
 
 describe("pricing", () => {
   it("prices decants from per-ml base and multipliers", () => {
-    // 10*2*1.75=35, 10*5*1.45=72.5->73 (round), 10*10*1.25=125
-    expect(decantPrices(p, s)).toEqual({ 2: 35, 5: 73, 10: 125 });
+    // 10*2*1.75=35, 10*3*1.6=48, 10*5*1.45=72.5->73 (round), 10*10*1.25=125
+    expect(decantPrices(p, s)).toEqual({ 2: 35, 3: 48, 5: 73, 10: 125 });
   });
   it("uses odd bottle sizes", () => {
     const q = { bottleSizeMl: 75, currentFillPercent: 100, marketValuePerBottle: 1500 }; // 20/ml

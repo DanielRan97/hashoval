@@ -6,6 +6,7 @@ import { saveSettings } from "../../actions";
 const FIELDS: [string, string][] = [
   ["spillagePercent", "פחת (%)"],
   ["multiplier2ml", "מקדם 2 מ״ל"],
+  ["multiplier3ml", "מקדם 3 מ״ל"],
   ["multiplier5ml", "מקדם 5 מ״ל"],
   ["multiplier10ml", "מקדם 10 מ״ל"],
   ["packagingCostPerUnit", "עלות אריזה ליחידה (₪)"],

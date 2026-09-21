@@ -1,9 +1,10 @@
-export const DECANT_SIZES = [2, 5, 10] as const;
+export const DECANT_SIZES = [2, 3, 5, 10] as const;
 export type DecantSize = (typeof DECANT_SIZES)[number];
 
 export type PricingSettings = {
   spillagePercent: number;
   multiplier2ml: number;
+  multiplier3ml: number;
   multiplier5ml: number;
   multiplier10ml: number;
 };
@@ -15,7 +16,7 @@ export type PricedProduct = {
 };
 
 function multiplierFor(size: DecantSize, s: PricingSettings): number {
-  return size === 2 ? s.multiplier2ml : size === 5 ? s.multiplier5ml : s.multiplier10ml;
+  return size === 2 ? s.multiplier2ml : size === 3 ? s.multiplier3ml : size === 5 ? s.multiplier5ml : s.multiplier10ml;
 }
 
 /** Price of one decant, rounded to the nearest whole shekel. */
@@ -25,7 +26,7 @@ export function decantPrice(p: PricedProduct, size: DecantSize, s: PricingSettin
 }
 
 export function decantPrices(p: PricedProduct, s: PricingSettings): Record<DecantSize, number> {
-  return { 2: decantPrice(p, 2, s), 5: decantPrice(p, 5, s), 10: decantPrice(p, 10, s) };
+  return { 2: decantPrice(p, 2, s), 3: decantPrice(p, 3, s), 5: decantPrice(p, 5, s), 10: decantPrice(p, 10, s) };
 }
 
 /** Raw ml left in the bottle. */

@@ -21,7 +21,7 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
     <>
       <h1>{p.brand} — {p.name}</h1>
       <p className="muted">
-        מחירים מחושבים (לקריאה בלבד): 2 מ״ל ₪{prices[2]} · 5 מ״ל ₪{prices[5]} · 10 מ״ל ₪{prices[10]}
+        מחירים מחושבים (לקריאה בלבד): 2 מ״ל ₪{prices[2]} · 3 מ״ל ₪{prices[3]} · 5 מ״ל ₪{prices[5]} · 10 מ״ל ₪{prices[10]}
       </p>
       <AddStockForm productId={p.id} productName={`${p.brand} ${p.name}`} currentMl={availableMl(p)} />
       <ProductForm id={p.id} brands={brandRows.map((b) => b.name)} values={{ ...p, images: p.images.map((i) => i.url) }} />

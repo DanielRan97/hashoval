@@ -97,6 +97,7 @@ model Settings {
   packagingCostPerUnit Float @default(3)
   paymentFeePercent    Float @default(2.5)
   multiplier2ml        Float @default(1.75)
+  multiplier3ml        Float @default(1.6)
   multiplier5ml        Float @default(1.45)
   multiplier10ml       Float @default(1.25)
   freeShippingThreshold Float @default(400)
@@ -105,6 +106,7 @@ model Settings {
   outOfStockThresholdMl Float @default(5)
   // Empty sample vials in stock, per size. null = not tracked (the size is never limited by vials).
   vials2ml             Int?
+  vials3ml             Int?
   vials5ml             Int?
   vials10ml            Int?
   vialLowThreshold     Int   @default(10)

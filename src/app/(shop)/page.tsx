@@ -53,7 +53,7 @@ export default async function Home() {
       <h1 className="sr-only">hashoval</h1>
       {showable.length > 0 && <Showcase all={showable} initial={shuffle(showable).slice(0, 10)} />}
       <p className="intro-line">
-        דוגמיות מקוריות · 2, 5 או 10 מ״ל · משלוח חינם מעל ₪{s.freeShippingThreshold}
+        דוגמיות מקוריות · 2, 3, 5 או 10 מ״ל · משלוח חינם מעל ₪{s.freeShippingThreshold}
       </p>
       <section className="container recs">
         {featured.length > 0 && (

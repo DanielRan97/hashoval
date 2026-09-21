@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { vialDelta, vialLevel, vialShortage, vialsAvailable, vialsNeeded, type VialSettings } from "./vials";
 
-const s = (over: Partial<VialSettings> = {}): VialSettings => ({ vials2ml: 20, vials5ml: null, vials10ml: 3, vialLowThreshold: 5, ...over });
+const s = (over: Partial<VialSettings> = {}): VialSettings => ({ vials2ml: 20, vials3ml: null, vials5ml: null, vials10ml: 3, vialLowThreshold: 5, ...over });
 
 describe("vials", () => {
   it("a count that was never entered means none, so the size cannot be sold", () => {

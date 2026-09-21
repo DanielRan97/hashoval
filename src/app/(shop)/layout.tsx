@@ -11,7 +11,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       <GlassDefs />
       <ProtectImages />
       <header className="site-header">
-        <Link href="/" className="logo" aria-label="hashoval, לדף הבית">hashoval</Link>
+        <Link href="/" className="logo" aria-label="hashoval, לדף הבית"><img src="/brand/logo-wordmark.png" alt="hashoval" width={1968} height={594} draggable={false} /></Link>
         <nav aria-label="ראשי">
           <Link href="/shop" className="nav-icon" data-label="חנות" aria-label="חנות"><IconShop /></Link>
           <Link href="/about" className="nav-icon" data-label="אודות" aria-label="אודות"><IconAbout /></Link>

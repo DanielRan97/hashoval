@@ -6,7 +6,7 @@ const serif = Frank_Ruhl_Libre({ subsets: ["hebrew", "latin"], weight: ["300", "
 const sans = Heebo({ subsets: ["hebrew", "latin"], weight: ["300", "400", "500", "600"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "hashoval — השובל שלך, בלי הימורים",
+  title: "hashoval",
   description: "דוגמיות מקוריות מבשמים יוקרתיים, כדי לבחור את השובל שלך בביטחון",
 };
 

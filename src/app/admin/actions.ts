@@ -92,7 +92,7 @@ export async function saveProduct(id: number | null, _: string | null, form: For
 
 const SETTING_KEYS = [
   "spillagePercent", "packagingCostPerUnit", "paymentFeePercent",
-  "multiplier2ml", "multiplier5ml", "multiplier10ml",
+  "multiplier2ml", "multiplier3ml", "multiplier5ml", "multiplier10ml",
   "freeShippingThreshold", "standardShippingCost", "lowStockThresholdMl", "outOfStockThresholdMl",
 ] as const;
 
@@ -202,10 +202,10 @@ export type VialsResult = { ok: boolean; msg: string } | null;
 /** Saves the empty sample-vial counts. An empty box counts as 0. */
 export async function saveVials(_: VialsResult, form: FormData): Promise<VialsResult> {
   await requireAdmin();
-  const data: { vials2ml: number | null; vials5ml: number | null; vials10ml: number | null; vialLowThreshold: number } = {
-    vials2ml: 0, vials5ml: 0, vials10ml: 0, vialLowThreshold: 10,
+  const data: { vials2ml: number | null; vials3ml: number | null; vials5ml: number | null; vials10ml: number | null; vialLowThreshold: number } = {
+    vials2ml: 0, vials3ml: 0, vials5ml: 0, vials10ml: 0, vialLowThreshold: 10,
   };
-  for (const size of [2, 5, 10] as const) {
+  for (const size of [2, 3, 5, 10] as const) {
     const raw = String(form.get(`vials${size}`) ?? "").trim();
     if (raw === "") { data[`vials${size}ml`] = 0; continue; }
     const n = Number(raw);
