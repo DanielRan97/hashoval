@@ -70,9 +70,6 @@ export default async function Shop({
           <Link href={href({ inStock: !state.inStock })} className={state.inStock ? "active" : undefined} aria-pressed={state.inStock}>
             {state.inStock ? "✓ " : ""}הצג רק מוצרים במלאי
           </Link>
-          <Link href={href({ latest: !state.latest })} className={state.latest ? "active" : undefined} aria-pressed={state.latest}>
-            {state.latest ? "✓ " : ""}חדש באתר
-          </Link>
         </div>
 
         <div className="brand-select">

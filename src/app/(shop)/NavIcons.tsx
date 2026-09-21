@@ -43,3 +43,13 @@ export function IconWish() {
     </svg>
   );
 }
+
+/** A magnifying glass: search. */
+export function IconSearch() {
+  return (
+    <svg {...base}>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="M15.4 15.4L20.5 20.5" />
+    </svg>
+  );
+}

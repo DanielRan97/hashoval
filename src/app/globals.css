@@ -1354,3 +1354,56 @@ tbody tr:hover { background: rgba(255, 255, 255, .04); }
 @media (max-width: 720px) {
   .shop-layout { grid-template-areas: "filters" "brandsel" "gendersel" "sort" "search" "products"; }
 }
+
+/* ---------- header search: a small window under the header ---------- */
+.nav-search { display: contents; }
+.nav-search > .nav-icon { border: 0; background: none; padding: 0; color: var(--muted); font: inherit; cursor: pointer; }
+.site-header .nav-search > button.nav-icon { position: relative; display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%; }
+.nav-search > .nav-icon:hover, .nav-search > .nav-icon[aria-expanded="true"] { color: var(--ink); background: rgba(255, 255, 255, .09); }
+.nav-search-panel {
+  position: absolute;
+  top: calc(100% + .6rem);
+  inset-inline: 0;
+  width: min(560px, calc(100% - 1rem));
+  margin-inline: auto;
+  padding: .9rem;
+  background: rgba(20, 22, 26, .96);
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 24px;
+  box-shadow: 0 26px 50px -16px rgba(0, 0, 0, .8);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  animation: nav-search-in .18s ease-out;
+}
+@keyframes nav-search-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.nav-search-panel .shop-search { max-width: none; margin: 0; z-index: auto; }
+.nav-search-panel .shop-search.inline .shop-search-list { position: static; margin-top: .6rem; max-height: min(55vh, 380px); box-shadow: none; background: none; border: 0; padding: .2rem 0 0; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.nav-search-msg { margin: 0; padding: .4rem .6rem; color: var(--muted); text-align: center; }
+
+/* the chosen switch stays light even while a finger or the pointer is still on it (on phones a tap left it looking grey) */
+.filters a.active, .filters a.active:hover, .filters a.active:focus, .filters a.active:active,
+.size.active, .size.active:hover, .size.active:focus {
+  color: #16130d;
+  background: linear-gradient(180deg, #f4efe4, #d9d2c2);
+  border-color: transparent;
+}
+@media (max-width: 720px) {
+  .site-header .logo img { height: 40px; }
+  .site-header a.nav-icon, .site-header .nav-search > button.nav-icon { width: 2.15rem; height: 2.15rem; }
+  .nav-icon svg { width: 1.25rem; height: 1.25rem; }
+}
+
+/* the magnifier needs no word next to it, and the labelled links sit a little closer, so all five fit beside the logo */
+.nav-search > .nav-icon::after { display: none; }
+@media (min-width: 721px) {
+  .site-header a.nav-icon { padding: 0 .7rem; }
+  .site-header nav { gap: .1rem; }
+}
+
+/* five icons on a phone: one line, a touch smaller */
+@media (max-width: 720px) {
+  .site-header nav { flex-wrap: nowrap; }
+  .site-header .logo img { height: 38px; }
+  .site-header a.nav-icon, .site-header .nav-search > button.nav-icon { width: 2rem; height: 2rem; }
+  .nav-icon svg { width: 1.15rem; height: 1.15rem; }
+}

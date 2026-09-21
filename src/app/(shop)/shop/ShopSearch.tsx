@@ -13,7 +13,19 @@ export type SearchEntry = { id: number; brand: string; name: string; image: stri
  * browser (the shop shows the whole catalogue anyway), so there are no requests while typing.
  * When nothing matches it says so and nothing else.
  */
-export function ShopSearch({ items }: { items: SearchEntry[] }) {
+export function ShopSearch({
+  items,
+  inline = false,
+  autoFocus = false,
+  onDone,
+}: {
+  items: SearchEntry[];
+  /** The results list sits in the flow under the box (inside the header's search window) instead of floating over the page. */
+  inline?: boolean;
+  autoFocus?: boolean;
+  /** Called after a result is chosen, so a surrounding window can close. */
+  onDone?: () => void;
+}) {
   const router = useRouter();
   const listId = useId();
   const root = useRef<HTMLDivElement>(null);
@@ -35,10 +47,11 @@ export function ShopSearch({ items }: { items: SearchEntry[] }) {
   const close = () => {
     setOpen(false);
     setActive(-1);
+    onDone?.();
   };
 
   return (
-    <div className="shop-search" ref={root}>
+    <div className={inline ? "shop-search inline" : "shop-search"} ref={root}>
       <input
         type="search"
         role="combobox"
@@ -50,6 +63,7 @@ export function ShopSearch({ items }: { items: SearchEntry[] }) {
         placeholder="חיפוש בושם או מותג"
         autoComplete="off"
         enterKeyHint="search"
+        autoFocus={autoFocus}
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
