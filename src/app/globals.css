@@ -1083,3 +1083,47 @@ tbody tr:hover { background: rgba(255, 255, 255, .04); }
 .trust-item strong { font-weight: 400; font-size: 1.02rem; letter-spacing: .02em; }
 .trust-item span { color: var(--muted); font-size: .88rem; max-width: 17rem; }
 @media (max-width: 720px) { .trust { grid-template-columns: 1fr; gap: 1.6rem; margin-top: 2.5rem; } }
+
+/* ---------- second polish round ---------- */
+.site-header .logo img { height: 72px; }
+@media (max-width: 720px) { .site-header .logo img { height: 52px; } }
+
+/* the favourite: a bigger name, a short text, so the eye goes to the perfume and the button */
+.favorite-name { font-size: clamp(2.3rem, 4.6vw, 3.6rem); }
+.favorite-text { -webkit-line-clamp: 3; max-width: 28rem; }
+
+/* room between a section title and its sliding row */
+.recs-title + .hscroll { margin-top: 2.2rem; }
+
+/* the three promises stay short: two lines at most */
+.trust-item span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ---------- product page: breadcrumb, one purchase block, bigger thumbnails ---------- */
+.crumbs { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; margin: 0 0 1.4rem; font-size: .88rem; color: var(--muted); }
+.crumbs a { color: var(--muted); text-decoration: none; transition: color .2s; }
+.crumbs a:hover { color: var(--ink); }
+.crumbs [aria-current] { color: var(--ink); }
+
+.product-info h1 { margin-bottom: .6rem; }
+.readmore { margin-bottom: 1.4rem; }
+.readmore-text { margin: 0; color: var(--muted); }
+.readmore-text.clamped { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.readmore-btn { margin-top: .3rem; font-size: .9rem; color: var(--brass); text-decoration: none; }
+.readmore-btn:hover { text-decoration: underline; }
+
+.buy { display: grid; gap: 1.1rem; padding-top: 1.4rem; border-top: 1px solid rgba(255, 255, 255, .09); }
+.buy-head { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
+.buy-label { color: var(--muted); font-size: .9rem; letter-spacing: .04em; }
+.buy .sizes { margin: 0; gap: .55rem; }
+.size.unavailable { opacity: .35; cursor: not-allowed; text-decoration: line-through; }
+.size.unavailable:hover { background: rgba(255, 255, 255, .03); color: var(--muted); transform: none; }
+.buy-foot { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; flex-wrap: wrap; }
+.buy-price { display: grid; line-height: 1.15; }
+.buy-price .price { color: var(--brass); font-size: 2.2rem; }
+.per-ml { font-size: .85rem; margin-top: .2rem; }
+.buy-note { margin: 0; font-size: .9rem; }
+
+.thumbs { gap: .65rem; margin-top: .3rem; }
+.thumbs button { width: 92px; height: 92px; opacity: .55; }
+.thumbs button.on { opacity: 1; box-shadow: 0 0 0 1.5px var(--brass); }
+@media (max-width: 720px) { .thumbs button { width: 72px; height: 72px; } .buy-price .price { font-size: 1.9rem; } }

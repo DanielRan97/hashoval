@@ -25,6 +25,8 @@ export type StoreProduct = {
   views: number;
   /** Sizes that can be bought right now, with prices. Empty when sold out. Never exposes ml stock. */
   options: { size: DecantSize; price: number }[];
+  /** Every decant size with its price and whether it can be bought now (for the product page). */
+  sizes: { size: DecantSize; price: number; available: boolean }[];
 };
 
 /** Active products, including sold-out ones (shown, but not purchasable). */
@@ -48,8 +50,8 @@ export async function getStoreProducts(): Promise<StoreProduct[]> {
     const net = sellableMl(p, s);
     const stock = stockLevel(net, s);
     const prices = decantPrices(p, s);
-    const options =
-      stock === "out" ? [] : DECANT_SIZES.filter((size) => size <= net && vialsAvailable(s, size)).map((size) => ({ size, price: prices[size] }));
+    const sizes = DECANT_SIZES.map((size) => ({ size, price: prices[size], available: stock !== "out" && size <= net && vialsAvailable(s, size) }));
+    const options = sizes.filter((x) => x.available).map(({ size, price }) => ({ size, price }));
     return {
       id: p.id,
       brand: p.brand,
@@ -65,6 +67,7 @@ export async function getStoreProducts(): Promise<StoreProduct[]> {
       // A product with no sellable size counts as sold out even above the threshold.
       stock: options.length === 0 ? ("out" as const) : stock,
       options,
+      sizes,
     };
   });
 }
