@@ -36,7 +36,7 @@
    | `ADMIN_PASSWORD` | סיסמה ארוכה, לפחות 12 תווים |
    | `SESSION_SECRET` | מחרוזת אקראית, לפחות 32 תווים |
    | `RESEND_API_KEY` | המפתח מ-Resend |
-   | `EMAIL_FROM` | `hashoval <orders@hashoval.co.il>` |
+   | `EMAIL_FROM` | `hashoval <hello@hashoval.co.il>` (חייבת להיות כתובת עם תיבה אמיתית, כי תשובות לקוחות חוזרות אליה) |
    | `OWNER_EMAIL` | הכתובת שלך להתראות |
 
    בלי `ADMIN_PASSWORD` ו-`SESSION_SECRET` חזקים, ההתחברות לאדמין תיחסם בכוונה.
