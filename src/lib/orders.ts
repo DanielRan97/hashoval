@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { expireUnpaidOrders } from "@/lib/orderFlow";
+import { isFullName, normalizeIsraeliMobile } from "@/lib/contact";
 import { stockLevel } from "@/lib/stock";
 import { ensureVialCounts, vialDelta, vialShortage, vialsNeeded } from "@/lib/vials";
 import {
@@ -28,8 +29,8 @@ const MAX_QTY = 10;
 export const HOLD_MINUTES = 15;
 
 function validate(i: OrderInput): string | null {
-  if (i.customerName.trim().length < 2) return "נא למלא שם מלא";
-  if (i.customerPhone.replace(/\D/g, "").length < 9) return "נא למלא מספר טלפון תקין";
+  if (!isFullName(i.customerName)) return "נא למלא שם פרטי ושם משפחה";
+  if (!normalizeIsraeliMobile(i.customerPhone)) return "נא למלא מספר נייד ישראלי תקין (למשל 0501234567)";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(i.customerEmail.trim())) return "נא למלא כתובת אימייל תקינה";
   if (i.customerAddress.trim().length < 6) return "נא למלא כתובת משלוח מלאה";
   if (i.items.length === 0) return "הסל ריק";

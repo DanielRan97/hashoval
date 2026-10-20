@@ -53,6 +53,7 @@ async function submit(form: FormData): Promise<string | null> {
       token: result.token,
       amount: result.amount,
       customerName: str("customerName"),
+      customerPhone: str("customerPhone"),
       customerEmail: str("customerEmail"),
     }));
   } catch (e) {

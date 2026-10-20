@@ -47,6 +47,18 @@
 
    כשמתחברים לספק סליקה אמיתי מסירים את שני המשתנים האלה.
 
+6. **סליקה עם Grow:** אחרי שמקבלים מ-Grow את `userId` ו-`pageCode`, מוסיפים:
+
+   | משתנה | ערך |
+   |---|---|
+   | `PAYMENT_PROVIDER` | `grow` |
+   | `GROW_USER_ID` | המזהה מ-Grow |
+   | `GROW_PAGE_CODE` | קוד הדף מ-Grow |
+   | `GROW_ENV` | `sandbox` לבדיקות. `live` רק לכסף אמיתי |
+   | `PUBLIC_SITE_URL` | `https://www.hashoval.co.il` (כתובת https, לא localhost) |
+
+   כתובת ההודעה של Grow לשרת היא `https://<הדומיין>/api/payments/grow`, והיא כבר פתוחה גם כשהאתר מוגן בסיסמה.
+
 ## דומיין
 
 1. ב-Railway: Settings ← Domains ← Custom Domain ← `hashoval.co.il` (או `www.hashoval.co.il`). תקבל רשומת CNAME.

@@ -78,7 +78,7 @@ export async function expireUnpaidOrders() {
  */
 export async function confirmPayment(
   orderId: number,
-  payment: { method: PaymentMethod; provider: string; txnId: string },
+  payment: { method: PaymentMethod; provider: string; txnId: string; txnToken?: string },
 ): Promise<FlowResult> {
   const flipped = await db.order.updateMany({
     where: { id: orderId, status: "pending_payment" },
@@ -89,6 +89,7 @@ export async function confirmPayment(
       paymentMethod: payment.method,
       paymentProvider: payment.provider,
       providerTxnId: payment.txnId,
+      providerTxnToken: payment.txnToken ?? null,
     },
   });
   if (flipped.count === 0) {
@@ -130,6 +131,7 @@ export async function cancelOrder(orderId: number, reason: string, restock: bool
         id: orderId,
         amount: previous.totalAmount,
         providerTxnId: previous.providerTxnId,
+        providerTxnToken: previous.providerTxnToken,
       });
       if (r.ok) {
         refunded = true;

@@ -2,12 +2,16 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { expireUnpaidOrders } from "@/lib/orderFlow";
-import { mockPaymentsEnabled } from "@/lib/payments";
+import { getPaymentProcessor, mockPaymentsEnabled } from "@/lib/payments";
 import { mockPay } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-/** Stand-in for the payment provider's hosted page, for testing only. */
+/**
+ * With a real provider this page only sends the customer on to the provider's payment page, making a
+ * fresh one each time (such links last only minutes). Back from a cancelled or failed payment it offers
+ * to try again. In test mode it is the fake payment page.
+ */
 export default async function PayPage({
   params,
   searchParams,
@@ -15,7 +19,6 @@ export default async function PayPage({
   params: Promise<{ token: string }>;
   searchParams: Promise<{ failed?: string }>;
 }) {
-  if (!mockPaymentsEnabled()) notFound();
   const { token } = await params;
   const { failed } = await searchParams;
   await expireUnpaidOrders();
@@ -31,6 +34,43 @@ export default async function PayPage({
       </div>
     );
   }
+
+  if (!mockPaymentsEnabled()) {
+    if (failed) {
+      return (
+        <div className="container prose">
+          <h1>התשלום לא הושלם</h1>
+          <p>לא בוצע חיוב. הבשמים שמורים לך לזמן קצר, אפשר לנסות שוב.</p>
+          <div className="actions">
+            <Link href={`/pay/${token}`} className="btn">לנסות שוב</Link>
+            <Link href="/cart" className="btn ghost">חזרה לסל</Link>
+          </div>
+        </div>
+      );
+    }
+    let url: string | null = null;
+    try {
+      ({ redirectUrl: url } = await getPaymentProcessor().createPayment({
+        id: order.id,
+        token: order.token ?? token,
+        amount: order.totalAmount,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        customerEmail: order.customerEmail,
+      }));
+    } catch (e) {
+      console.error("payment start failed", e);
+    }
+    if (url) redirect(url);
+    return (
+      <div className="container prose">
+        <h1>לא הצלחנו להתחיל את התשלום</h1>
+        <p>נסו שוב בעוד רגע.</p>
+        <Link href={`/pay/${token}`} className="btn">לנסות שוב</Link>
+      </div>
+    );
+  }
+
   const minutes = order.holdExpiresAt ? Math.max(0, Math.ceil((order.holdExpiresAt.getTime() - Date.now()) / 60000)) : 0;
   const pay = (method: string, outcome: "success" | "fail") => mockPay.bind(null, token, method, outcome);
 

@@ -67,6 +67,7 @@ model Order {
   paymentMethod   String?     // card | apple_pay | google_pay
   paymentProvider String?
   providerTxnId   String?
+  providerTxnToken String? // some providers (Grow) need a second identifier to refund
   paidAt          DateTime?
   refundedAt      DateTime?
   shippedAt       DateTime?
