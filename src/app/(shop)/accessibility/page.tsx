@@ -14,9 +14,10 @@ export default function Accessibility() {
         טרם נערכה בדיקת נגישות מקצועית לאתר, ולכן ייתכן שחלקים ממנו אינם נגישים במלואם. אם נתקלת בקושי, נשמח
         לשמוע ולתקן.
       </p>
-      <h2>פרטי רכז הנגישות</h2>
+      <h2>פניות בנושא נגישות</h2>
       <p>
-        {show(BUSINESS.accessibilityCoordinator)} · טלפון: {show(BUSINESS.phone)} · דוא״ל: {show(BUSINESS.email)}
+        {BUSINESS.accessibilityCoordinator.trim() && <>{BUSINESS.accessibilityCoordinator} · </>}
+        טלפון: {show(BUSINESS.phone)} · דוא״ל: {show(BUSINESS.email)}
       </p>
       <p>[יש להשלים לפני פרסום: תאריך עדכון ההצהרה, ורמת התאמה שנבדקה על ידי גורם מוסמך.]</p>
     </LegalPage>

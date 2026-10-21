@@ -5,12 +5,12 @@
 export const LEGAL_REVIEWED = false;
 
 export const BUSINESS = {
-  name: "", // שם העסק כפי שרשום
-  id: "", // ח.פ. / עוסק מורשה / עוסק פטור
-  address: "",
-  phone: "",
-  email: "",
-  accessibilityCoordinator: "", // שם רכז/ת הנגישות
+  name: "דיסטמס (Dystems)", // שם העסק כפי שרשום
+  id: "עוסק מס׳ 318188505", // מספר העוסק; סוג העוסק לא מוצג באתר
+  address: "קדיש לוז 8, קריית מוצקין",
+  phone: "054-2571330",
+  email: "hello@hashoval.co.il",
+  accessibilityCoordinator: "", // שם רכז/ת הנגישות; ריק = מוצגים רק פרטי הפנייה
 };
 
 const MISSING = "[יש להשלים]";
