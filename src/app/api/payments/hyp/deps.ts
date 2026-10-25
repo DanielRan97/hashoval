@@ -7,8 +7,8 @@ import { confirmPayment } from "@/lib/orderFlow";
 /** What the customer return and Hyp's webhook share: the database, Hyp's VERIFY, and the owner's mailbox. */
 export const deps: HypDeps = {
   verify: (params) => verifyReturn(params),
-  findOrderByToken: async (token) => {
-    const o = await db.order.findUnique({ where: { token }, select: { id: true, token: true, totalAmount: true, paidAt: true, providerTxnId: true } });
+  findOrderById: async (id) => {
+    const o = await db.order.findUnique({ where: { id }, select: { id: true, token: true, totalAmount: true, paidAt: true, providerTxnId: true } });
     return o && o.token ? { ...o, token: o.token } : null;
   },
   findOrderByTxn: (transactionId) => db.order.findFirst({ where: { providerTxnId: transactionId, paymentProvider: "hyp" }, select: { id: true } }),

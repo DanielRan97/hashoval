@@ -1,10 +1,10 @@
-import { tokenFromRef } from "./grow";
+import { orderRef } from "./grow";
 import type { OrderLite } from "./growCallback";
 import type { HypVerified } from "./hyp";
 
 export type HypDeps = {
   verify(params: [string, string][]): Promise<HypVerified>;
-  findOrderByToken(token: string): Promise<(OrderLite & { token: string }) | null>;
+  findOrderById(id: number): Promise<(OrderLite & { token: string }) | null>;
   findOrderByTxn(transactionId: string): Promise<{ id: number } | null>;
   confirm(orderId: number, transactionId: string): Promise<{ ok: true } | { ok: false; error: string }>;
   alertOwner(subject: string, lines: string[]): Promise<void>;
@@ -27,18 +27,24 @@ const close = (a: number, b: number) => Math.abs(a - b) < 0.005;
  */
 export async function handleHypReturn(params: [string, string][], deps: HypDeps): Promise<HypOutcome> {
   const get = (k: string) => params.find(([key]) => key === k)?.[1] ?? null;
-  const ref = get("Fild1");
-  const token = ref ? tokenFromRef(ref) : null;
-  const order = token ? await deps.findOrderByToken(token) : null;
+  const orderNo = Number(get("Order"));
+  const order = Number.isSafeInteger(orderNo) && orderNo > 0 ? await deps.findOrderById(orderNo) : null;
   if (!order) return { kind: "unknown", reason: "unknown order" };
-  if (get("Order") !== null && Number(get("Order")) !== order.id) return { kind: "unknown", reason: "order mismatch" };
+  // Hyp sends Fild1 back cut to its first 8 characters. They still tie the return to this order's secret
+  // token, so a made-up order number does not lead anyone to someone else's order pages.
+  const ref = (get("Fild1") ?? "").trim().toLowerCase();
+  const refMatches = ref.length >= 8 && orderRef(order.token).startsWith(ref);
 
   const transactionId = get("Id");
   // Anything but CCode=0 is a declined or cancelled payment; the customer may try again.
-  if (get("CCode") !== "0" || !transactionId) return order.paidAt ? { kind: "paid", token: order.token } : { kind: "failed", token: order.token };
+  if (get("CCode") !== "0" || !transactionId) {
+    if (!refMatches) return { kind: "unknown", reason: "order mismatch" };
+    return order.paidAt ? { kind: "paid", token: order.token } : { kind: "failed", token: order.token };
+  }
 
   const v = await deps.verify(params);
   if (!v.ok || !v.valid) {
+    if (!refMatches) return { kind: "unknown", reason: "order mismatch" };
     if (!order.paidAt && !(v.ok === false && v.transient)) {
       await deps.alertOwner(`תשלום ב-Hyp לא אומת, הזמנה ${order.id}`, [
         `לקוח חזר מ-Hyp עם עסקה ${transactionId} להזמנה ${order.id}, אבל Hyp לא אישר את הפרטים כשנשאל.`,

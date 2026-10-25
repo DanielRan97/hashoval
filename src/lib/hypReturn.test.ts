@@ -4,7 +4,7 @@ import { orderedParams } from "./hyp";
 import { handleHypReturn, type HypDeps } from "./hypReturn";
 
 const TOKEN = "123e4567-e89b-12d3-a456-426614174000";
-const REF = orderRef(TOKEN);
+const REF = orderRef(TOKEN).slice(0, 8); // Hyp sends Fild1 back cut to 8 characters
 const back = (over: Record<string, string> = {}) => {
   const p = new URLSearchParams({ Id: "555", CCode: "0", Amount: "103.00", ACode: "0012345", Order: "42", Fild1: REF, Sign: "xyz" });
   for (const [k, v] of Object.entries(over)) p.set(k, v);
@@ -21,7 +21,7 @@ function setup(row: Partial<Row> | null = {}, over: Partial<HypDeps> = {}) {
       log.verified += 1;
       return { ok: true, valid: true };
     },
-    findOrderByToken: async (t) => (t === TOKEN ? order : null),
+    findOrderById: async (id) => (id === 42 ? order : null),
     findOrderByTxn: async () => null,
     confirm: async (id) => {
       log.confirmed.push(id);
@@ -46,11 +46,23 @@ describe("handleHypReturn", () => {
     expect(log).toMatchObject({ confirmed: [], verified: 0 });
   });
 
-  it("ignores returns for an unknown order or a mismatched order number", async () => {
+  it("ignores returns for an unknown order", async () => {
     expect((await handleHypReturn(back(), setup(null).deps)).kind).toBe("unknown");
-    const { deps, log } = setup();
-    expect(await handleHypReturn(back({ Order: "99" }), deps)).toEqual({ kind: "unknown", reason: "order mismatch" });
-    expect(log.confirmed).toEqual([]);
+    expect((await handleHypReturn(back({ Order: "99" }), setup().deps)).kind).toBe("unknown");
+  });
+
+  it("does not reveal an order's pages to a return whose Fild1 does not belong to it", async () => {
+    for (const Fild1 of ["deadbeef", "", "123"]) {
+      const { deps, log } = setup({}, { verify: async () => ({ ok: true, valid: false }) });
+      expect(await handleHypReturn(back({ Fild1, CCode: "6" }), deps)).toEqual({ kind: "unknown", reason: "order mismatch" });
+      expect(await handleHypReturn(back({ Fild1 }), deps)).toEqual({ kind: "unknown", reason: "order mismatch" });
+      expect(log).toMatchObject({ confirmed: [], alerts: [] });
+    }
+  });
+
+  it("accepts the full reference too, in case Hyp stops cutting it", async () => {
+    const { deps } = setup();
+    expect((await handleHypReturn(back({ Fild1: orderRef(TOKEN) }), deps)).kind).toBe("paid");
   });
 
   it("does not confirm parameters Hyp does not vouch for, and tells the owner", async () => {
