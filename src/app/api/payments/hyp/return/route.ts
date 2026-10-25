@@ -1,7 +1,7 @@
 import { orderedParams } from "@/lib/hyp";
 import { handleHypReturn, type HypOutcome } from "@/lib/hypReturn";
 import { clientIp, consume } from "@/lib/rateLimit";
-import { deps } from "../deps";
+import { deps, logHyp } from "../deps";
 
 export const dynamic = "force-dynamic";
 
@@ -30,13 +30,15 @@ async function limited() {
 
 export async function GET(req: Request) {
   if (await limited()) return new Response("Too many requests", { status: 429 });
+  const params = orderedParams(new URL(req.url).search);
   let outcome: HypOutcome;
   try {
-    outcome = await handleHypReturn(orderedParams(new URL(req.url).search), deps);
+    outcome = await handleHypReturn(params, deps);
   } catch (e) {
     console.error("hyp return failed", e instanceof Error ? e.message : e);
     outcome = { kind: "unknown", reason: "error" };
   }
+  logHyp("return", params, outcome.kind === "unknown" ? `unknown (${outcome.reason})` : outcome.kind);
   // A relative address, so it works behind the hosting proxy whatever the internal host name is.
   return new Response(null, { status: 303, headers: { Location: nextPage(outcome) } });
 }

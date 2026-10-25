@@ -19,3 +19,12 @@ export const deps: HypDeps = {
     else console.error(`[OWNER_EMAIL not set] ${subject}\n${lines.join("\n")}`);
   },
 };
+
+/** One log line per call from Hyp: which fields came and how it ended, without personal or card details. */
+export function logHyp(where: string, params: [string, string][], outcome: string) {
+  const get = (k: string) => params.find(([key]) => key === k)?.[1];
+  const fild1 = get("Fild1");
+  console.log(
+    `hyp ${where}: outcome=${outcome} CCode=${get("CCode") ?? "-"} Order=${get("Order") ?? "-"} Id=${get("Id") ?? "-"} Fild1=${fild1 ? `${fild1.length} chars` : "-"} keys=${params.map(([k]) => k).join(",")}`,
+  );
+}

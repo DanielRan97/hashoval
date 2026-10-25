@@ -1,7 +1,7 @@
 import { orderedParams } from "@/lib/hyp";
 import { handleHypReturn } from "@/lib/hypReturn";
 import { clientIp, consume } from "@/lib/rateLimit";
-import { deps } from "../deps";
+import { deps, logHyp } from "../deps";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,9 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   if (!(await consume(`hypnotify:${await clientIp()}`, 600, 10 * 60_000)).ok) return new Response("Too many requests", { status: 429 });
   try {
-    const outcome = await handleHypReturn(orderedParams(new URL(req.url).search), deps);
+    const params = orderedParams(new URL(req.url).search);
+    const outcome = await handleHypReturn(params, deps);
+    logHyp("notify", params, outcome.kind === "unknown" ? `unknown (${outcome.reason})` : outcome.kind);
     if (outcome.kind === "pending" && outcome.retry) return new Response("Try again", { status: 503 });
     return new Response("OK", { status: 200 });
   } catch (e) {
