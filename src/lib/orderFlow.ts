@@ -2,7 +2,7 @@ import { AUTO_COMPLETE_DAYS } from "@/lib/autoComplete";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
 import { notifyOrderPaid, notifyOrderShipped } from "@/lib/notify";
-import { getPaymentProcessor, type PaymentMethod } from "@/lib/payments";
+import { processorFor, type PaymentMethod } from "@/lib/payments";
 import { fillPercentAfterRestock } from "@/lib/pricing";
 import { ensureVialCounts, vialDelta, vialsNeeded } from "@/lib/vials";
 
@@ -127,12 +127,11 @@ export async function cancelOrder(orderId: number, reason: string, restock: bool
   let note = "ההזמנה בוטלה.";
   if (previous.paidAt) {
     if (previous.paymentProvider) {
-      const r = await getPaymentProcessor().refund({
-        id: orderId,
-        amount: previous.totalAmount,
-        providerTxnId: previous.providerTxnId,
-        providerTxnToken: previous.providerTxnToken,
-      });
+      const order = { id: orderId, amount: previous.totalAmount, providerTxnId: previous.providerTxnId, providerTxnToken: previous.providerTxnToken };
+      const provider = previous.paymentProvider;
+      const r = await Promise.resolve()
+        .then(() => processorFor(provider).refund(order))
+        .catch((e: unknown) => ({ ok: false as const, error: e instanceof Error ? e.message : `ספק תשלום לא מוכר: ${provider}` }));
       if (r.ok) {
         refunded = true;
         await db.order.update({ where: { id: orderId }, data: { refundedAt: new Date() } });

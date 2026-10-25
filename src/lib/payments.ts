@@ -59,7 +59,11 @@ export function mockPaymentsEnabled() {
 }
 
 export function getPaymentProcessor(): PaymentProcessor {
-  const provider = paymentProvider();
+  return processorFor(paymentProvider());
+}
+
+/** The processor an order was paid through, whatever the site uses now: refunds must go back the same way. */
+export function processorFor(provider: string): PaymentProcessor {
   if (provider === "mock") return mockProcessor;
   if (provider === "grow") return createGrowProcessor();
   if (provider === "hyp") return createHypProcessor();
