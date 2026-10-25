@@ -7,6 +7,7 @@
  * exactly like the test payment page does.
  */
 import { createGrowProcessor } from "./grow";
+import { createHypProcessor } from "./hyp";
 
 export type PaymentMethod = "card" | "apple_pay" | "google_pay";
 
@@ -48,7 +49,7 @@ export const mockProcessor: PaymentProcessor = {
   },
 };
 
-/** Which provider is configured: "mock" (test), "grow", or "" when none. The mock is the default in development only. */
+/** Which provider is configured: "mock" (test), "hyp", "grow", or "" when none. The mock is the default in development only. */
 export function paymentProvider() {
   return (process.env.PAYMENT_PROVIDER ?? (process.env.NODE_ENV === "production" ? "" : "mock")).trim().toLowerCase();
 }
@@ -61,5 +62,6 @@ export function getPaymentProcessor(): PaymentProcessor {
   const provider = paymentProvider();
   if (provider === "mock") return mockProcessor;
   if (provider === "grow") return createGrowProcessor();
-  throw new Error("No payment provider is configured (set PAYMENT_PROVIDER to mock or grow)");
+  if (provider === "hyp") return createHypProcessor();
+  throw new Error("No payment provider is configured (set PAYMENT_PROVIDER to mock, hyp or grow)");
 }
