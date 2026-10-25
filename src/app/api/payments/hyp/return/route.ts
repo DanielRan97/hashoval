@@ -1,5 +1,6 @@
 import { orderedParams } from "@/lib/hyp";
-import { handleHypReturn, type HypOutcome } from "@/lib/hypReturn";
+import { cookies } from "next/headers";
+import { HYP_ORDER_COOKIE, handleHypReturn, type HypOutcome } from "@/lib/hypReturn";
 import { clientIp, consume } from "@/lib/rateLimit";
 import { deps, logHyp } from "../deps";
 
@@ -33,7 +34,7 @@ export async function GET(req: Request) {
   const params = orderedParams(new URL(req.url).search);
   let outcome: HypOutcome;
   try {
-    outcome = await handleHypReturn(params, deps);
+    outcome = await handleHypReturn(params, deps, (await cookies()).get(HYP_ORDER_COOKIE)?.value);
   } catch (e) {
     console.error("hyp return failed", e instanceof Error ? e.message : e);
     outcome = { kind: "unknown", reason: "error" };

@@ -4,7 +4,7 @@ import { orderedParams } from "./hyp";
 import { handleHypReturn, type HypDeps } from "./hypReturn";
 
 const TOKEN = "123e4567-e89b-12d3-a456-426614174000";
-const REF = orderRef(TOKEN).slice(0, 8); // Hyp sends Fild1 back cut to 8 characters
+const REF = "a1b2c3d4"; // what Hyp actually sends back in Fild1: not our reference
 const back = (over: Record<string, string> = {}) => {
   const p = new URLSearchParams({ Id: "555", CCode: "0", Amount: "103.00", ACode: "0012345", Order: "42", Fild1: REF, Sign: "xyz" });
   for (const [k, v] of Object.entries(over)) p.set(k, v);
@@ -36,13 +36,13 @@ function setup(row: Partial<Row> | null = {}, over: Partial<HypDeps> = {}) {
 describe("handleHypReturn", () => {
   it("marks a verified payment of the right amount as paid", async () => {
     const { deps, log } = setup();
-    expect(await handleHypReturn(back(), deps)).toEqual({ kind: "paid", token: TOKEN });
+    expect(await handleHypReturn(back(), deps, TOKEN)).toEqual({ kind: "paid", token: TOKEN });
     expect(log).toMatchObject({ confirmed: [42], alerts: [], verified: 1 });
   });
 
   it("sends a declined payment back to try again, without asking Hyp or confirming", async () => {
     const { deps, log } = setup();
-    expect(await handleHypReturn(back({ CCode: "6" }), deps)).toEqual({ kind: "failed", token: TOKEN });
+    expect(await handleHypReturn(back({ CCode: "6" }), deps, TOKEN)).toEqual({ kind: "failed", token: TOKEN });
     expect(log).toMatchObject({ confirmed: [], verified: 0 });
   });
 
@@ -51,61 +51,67 @@ describe("handleHypReturn", () => {
     expect((await handleHypReturn(back({ Order: "99" }), setup().deps)).kind).toBe("unknown");
   });
 
-  it("does not reveal an order's pages to a return whose Fild1 does not belong to it", async () => {
-    for (const Fild1 of ["deadbeef", "", "123"]) {
+  it("does not reveal an order's pages to a return that cannot show the order is theirs", async () => {
+    for (const cookie of [undefined, null, "", "123e4567-e89b-12d3-a456-000000000000"]) {
       const { deps, log } = setup({}, { verify: async () => ({ ok: true, valid: false }) });
-      expect(await handleHypReturn(back({ Fild1, CCode: "6" }), deps)).toEqual({ kind: "unknown", reason: "order mismatch" });
-      expect(await handleHypReturn(back({ Fild1 }), deps)).toEqual({ kind: "unknown", reason: "order mismatch" });
+      expect(await handleHypReturn(back({ CCode: "6" }), deps, cookie)).toEqual({ kind: "unknown", reason: "order mismatch" });
+      expect(await handleHypReturn(back(), deps, cookie)).toEqual({ kind: "unknown", reason: "order mismatch" });
       expect(log).toMatchObject({ confirmed: [], alerts: [] });
     }
   });
 
-  it("accepts the full reference too, in case Hyp stops cutting it", async () => {
+  it("accepts our full reference in Fild1 instead of the cookie", async () => {
     const { deps } = setup();
-    expect((await handleHypReturn(back({ Fild1: orderRef(TOKEN) }), deps)).kind).toBe("paid");
+    expect(await handleHypReturn(back({ CCode: "6", Fild1: orderRef(TOKEN) }), deps)).toEqual({ kind: "failed", token: TOKEN });
+  });
+
+  it("confirms a payment Hyp vouches for even without the cookie (the webhook)", async () => {
+    const { deps, log } = setup();
+    expect(await handleHypReturn(back(), deps)).toEqual({ kind: "paid", token: TOKEN });
+    expect(log.confirmed).toEqual([42]);
   });
 
   it("does not confirm parameters Hyp does not vouch for, and tells the owner", async () => {
     const { deps, log } = setup({}, { verify: async () => ({ ok: true, valid: false }) });
-    expect(await handleHypReturn(back(), deps)).toEqual({ kind: "pending", token: TOKEN });
+    expect(await handleHypReturn(back(), deps, TOKEN)).toEqual({ kind: "pending", token: TOKEN });
     expect(log.confirmed).toEqual([]);
     expect(log.alerts).toHaveLength(1);
   });
 
   it("waits quietly when Hyp could not be reached", async () => {
     const { deps, log } = setup({}, { verify: async () => ({ ok: false, transient: true }) });
-    expect(await handleHypReturn(back(), deps)).toEqual({ kind: "pending", token: TOKEN, retry: true });
+    expect(await handleHypReturn(back(), deps, TOKEN)).toEqual({ kind: "pending", token: TOKEN, retry: true });
     expect(log).toMatchObject({ confirmed: [], alerts: [] });
   });
 
   it("does not confirm a different amount, and tells the owner", async () => {
     const { deps, log } = setup();
-    expect((await handleHypReturn(back({ Amount: "1.00" }), deps)).kind).toBe("pending");
+    expect((await handleHypReturn(back({ Amount: "1.00" }), deps, TOKEN)).kind).toBe("pending");
     expect(log.confirmed).toEqual([]);
     expect(log.alerts).toHaveLength(1);
   });
 
   it("lets one transaction pay only one order", async () => {
     const { deps, log } = setup({}, { findOrderByTxn: async () => ({ id: 41 }) });
-    expect((await handleHypReturn(back(), deps)).kind).toBe("unknown");
+    expect((await handleHypReturn(back(), deps, TOKEN)).kind).toBe("unknown");
     expect(log.confirmed).toEqual([]);
   });
 
   it("accepts coming back again for an order already paid with this transaction", async () => {
     const { deps, log } = setup({ paidAt: new Date(), providerTxnId: "555" });
-    expect(await handleHypReturn(back(), deps)).toEqual({ kind: "paid", token: TOKEN });
+    expect(await handleHypReturn(back(), deps, TOKEN)).toEqual({ kind: "paid", token: TOKEN });
     expect(log).toMatchObject({ confirmed: [], alerts: [] });
   });
 
   it("tells the owner about a second payment for an order already paid", async () => {
     const { deps, log } = setup({ paidAt: new Date(), providerTxnId: "554" });
-    expect((await handleHypReturn(back(), deps)).kind).toBe("paid");
+    expect((await handleHypReturn(back(), deps, TOKEN)).kind).toBe("paid");
     expect(log.alerts).toHaveLength(1);
   });
 
   it("tells the owner when the money came after the order expired", async () => {
     const { deps, log } = setup({}, { confirm: async () => ({ ok: false, error: "expired" }) });
-    expect((await handleHypReturn(back(), deps)).kind).toBe("pending");
+    expect((await handleHypReturn(back(), deps, TOKEN)).kind).toBe("pending");
     expect(log.alerts).toHaveLength(1);
   });
 });

@@ -1,6 +1,8 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { HYP_ORDER_COOKIE } from "@/lib/hypReturn";
 import { createOrder } from "@/lib/orders";
 import { getPaymentProcessor } from "@/lib/payments";
 import { clientIp, minutes, recordHit, retryAfterSeconds } from "@/lib/rateLimit";
@@ -60,6 +62,14 @@ async function submit(form: FormData): Promise<string | null> {
     console.error("payment start failed", e);
     return "לא הצלחנו להתחיל את התשלום. נסו שוב בעוד רגע.";
   }
+  // Lets the return from the payment page show that this browser placed the order.
+  (await cookies()).set(HYP_ORDER_COOKIE, result.token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/api/payments/hyp",
+    maxAge: 2 * 60 * 60,
+  });
   redirect(redirectUrl);
 }
 

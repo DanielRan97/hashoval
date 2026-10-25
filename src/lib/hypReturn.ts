@@ -2,6 +2,9 @@ import { orderRef } from "./grow";
 import type { OrderLite } from "./growCallback";
 import type { HypVerified } from "./hyp";
 
+/** Set at checkout, read when the customer comes back from Hyp. */
+export const HYP_ORDER_COOKIE = "hyp_order";
+
 export type HypDeps = {
   verify(params: [string, string][]): Promise<HypVerified>;
   findOrderById(id: number): Promise<(OrderLite & { token: string }) | null>;
@@ -25,15 +28,21 @@ const close = (a: number, b: number) => Math.abs(a - b) < 0.005;
  * be the order's, the transaction may pay only one order, a repeat is fine, and money the shop cannot
  * use (a second payment, or an order that expired first) is reported to the owner.
  */
-export async function handleHypReturn(params: [string, string][], deps: HypDeps): Promise<HypOutcome> {
+/**
+ * `customerToken` is the order token the shop left in the customer's browser at checkout (see
+ * HYP_ORDER_COOKIE), when the call comes from that browser; Hyp's webhook has none.
+ */
+export async function handleHypReturn(params: [string, string][], deps: HypDeps, customerToken?: string | null): Promise<HypOutcome> {
   const get = (k: string) => params.find(([key]) => key === k)?.[1] ?? null;
   const orderNo = Number(get("Order"));
   const order = Number.isSafeInteger(orderNo) && orderNo > 0 ? await deps.findOrderById(orderNo) : null;
   if (!order) return { kind: "unknown", reason: "unknown order" };
-  // Hyp sends Fild1 back cut to its first 8 characters. They still tie the return to this order's secret
-  // token, so a made-up order number does not lead anyone to someone else's order pages.
+  // The order number alone is guessable, so before sending anyone to an order's pages (a declined payment,
+  // or parameters Hyp did not vouch for) the return must also show it belongs to them: the cookie from
+  // checkout, or our reference in Fild1. (Hyp has been seen to send Fild1 back as an unrelated 8-character
+  // value, so the cookie is what normally does it.)
   const ref = (get("Fild1") ?? "").trim().toLowerCase();
-  const refMatches = ref.length >= 8 && orderRef(order.token).startsWith(ref);
+  const refMatches = (!!customerToken && customerToken === order.token) || (ref.length === 32 && orderRef(order.token) === ref);
 
   const transactionId = get("Id");
   // Anything but CCode=0 is a declined or cancelled payment; the customer may try again.
