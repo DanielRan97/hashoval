@@ -8,6 +8,9 @@ function load(where: object) {
   return db.order.findMany({ where, orderBy: { createdAt: "desc" }, include: { items: true } });
 }
 
+/** When it was paid, or for an unpaid order when it was placed. */
+const when = (d: Date) => `${d.toLocaleDateString("he-IL")} · ${d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}`;
+
 function Rows({ orders }: { orders: Order[] }) {
   return (
     <div className="table-scroll"><table>
@@ -16,7 +19,7 @@ function Rows({ orders }: { orders: Order[] }) {
         {orders.map((o) => (
           <tr key={o.id}>
             <td>{o.id}</td>
-            <td className="nowrap">{o.createdAt.toLocaleDateString("he-IL")} · {o.createdAt.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}</td>
+            <td className="nowrap">{when(o.paidAt ?? o.createdAt)}</td>
             <td>{o.customerName}</td>
             <td>{o.items.reduce((n, i) => n + i.quantity, 0)}</td>
             <td>₪{o.totalAmount}</td>
