@@ -8,10 +8,15 @@ function loadOrder(orderId: number) {
   return db.order.findUnique({ where: { id: orderId }, include: { items: { include: { product: true } } } });
 }
 
+/**
+ * The English perfume name and the Hebrew size share no line, or the email client's right-to-left layout
+ * shuffles them; the size line starts with a right-to-left mark so it reads in Hebrew order.
+ */
 function itemLines(o: FullOrder) {
-  return o.items.map(
-    (i) => `• ${i.product.brand} ${i.product.name} — ${i.decantSizeMl} מ״ל × ${i.quantity} — ₪${i.unitPrice * i.quantity}`,
-  );
+  return o.items.flatMap((i) => [
+    `• ${i.product.brand} ${i.product.name}`,
+    `\u200F${i.decantSizeMl} מ״ל × ${i.quantity} · ₪${i.unitPrice * i.quantity}`,
+  ]);
 }
 
 function summary(o: FullOrder) {

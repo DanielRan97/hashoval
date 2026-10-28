@@ -20,11 +20,15 @@ export const deps: HypDeps = {
   },
 };
 
-/** One log line per call from Hyp: which fields came and how it ended, without personal or card details. */
+/**
+ * One log line per call from Hyp: which fields came and how it ended, without personal or card details.
+ * Brand, Issuer, SpType and ECI are codes (card network, issuer, transaction type, 3DS/wallet indicator),
+ * logged to learn how Hyp marks Apple Pay and Google Pay.
+ */
 export function logHyp(where: string, params: [string, string][], outcome: string) {
   const get = (k: string) => params.find(([key]) => key === k)?.[1];
   const fild1 = get("Fild1");
   console.log(
-    `hyp ${where}: outcome=${outcome} CCode=${get("CCode") ?? "-"} Order=${get("Order") ?? "-"} Id=${get("Id") ?? "-"} Fild1=${fild1 ? `${fild1.length} chars` : "-"} keys=${params.map(([k]) => k).join(",")}`,
+    `hyp ${where}: outcome=${outcome} CCode=${get("CCode") ?? "-"} Order=${get("Order") ?? "-"} Id=${get("Id") ?? "-"} Fild1=${fild1 ? `${fild1.length} chars` : "-"} Brand=${get("Brand") ?? "-"} Issuer=${get("Issuer") ?? "-"} SpType=${get("SpType") ?? "-"} ECI=${get("ECI") ?? "-"} keys=${params.map(([k]) => k).join(",")}`,
   );
 }

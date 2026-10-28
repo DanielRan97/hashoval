@@ -11,12 +11,12 @@ function load(where: object) {
 function Rows({ orders }: { orders: Order[] }) {
   return (
     <div className="table-scroll"><table>
-      <thead><tr><th>#</th><th>תאריך</th><th>לקוח</th><th>פריטים</th><th>סה״כ</th><th>סטטוס</th><th></th></tr></thead>
+      <thead><tr><th>#</th><th>תאריך ושעה</th><th>לקוח</th><th>פריטים</th><th>סה״כ</th><th>סטטוס</th><th></th></tr></thead>
       <tbody>
         {orders.map((o) => (
           <tr key={o.id}>
             <td>{o.id}</td>
-            <td>{o.createdAt.toLocaleDateString("he-IL")}</td>
+            <td className="nowrap">{o.createdAt.toLocaleDateString("he-IL")} · {o.createdAt.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}</td>
             <td>{o.customerName}</td>
             <td>{o.items.reduce((n, i) => n + i.quantity, 0)}</td>
             <td>₪{o.totalAmount}</td>
